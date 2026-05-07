@@ -29,7 +29,15 @@ export default defineConfig(({ mode }) => {
   const lightPromptJa = key ? decryptEncFile('src/prompts/light_ja.enc', key) : ''
   const lightPromptEn = key ? decryptEncFile('src/prompts/light_en.enc', key) : ''
 
+  // GitHub Actions の GITHUB_REPOSITORY からリポジトリ名を抽出して base に設定
+  // 公開リポジトリ（kikurage-en/claudewizard-webapp）→ '/claudewizard-webapp/'
+  // ローカル開発（dev / preview / test）→ '/'
+  // VITE_BASE_PATH 明示指定があればそれを優先（手動上書き用）
+  const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1]
+  const base = process.env.VITE_BASE_PATH || (repoName ? `/${repoName}/` : '/')
+
   return {
+    base,
     plugins: [react()],
     resolve: {
       alias: {
