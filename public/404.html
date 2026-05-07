@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClaudeWizard</title>
+    <script>
+      // GitHub Pages SPA fallback: redirect to index.html with hash routing
+      const path = window.location.pathname
+      const base = '/claudewizard-web'
+      const sub = path.startsWith(base) ? path.slice(base.length) : path
+      const dest = window.location.origin + base + '/#' + (sub || '/')
+      window.location.replace(dest)
+    </script>
+  </head>
+  <body></body>
+</html>

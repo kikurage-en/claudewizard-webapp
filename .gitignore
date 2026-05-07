@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment
+.env
+.env.*
+!.env.local.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Claude Code（個人設定）
+.claude/settings.local.json
+
+# Wizard 一時ログ
+.wizard-log.md
+
+# Prompt 平文（暗号化版 .enc のみコミット）
+src/prompts/*.md
+src/prompts/*.txt
+src/prompts/light_*.ts
+src/prompts/plus_*.ts
+!src/prompts/free_*.ts

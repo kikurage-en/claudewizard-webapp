@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Favicon (inline SVG: orange dolphin pixel placeholder) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FAF5EB'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='22'%3E🐬%3C/text%3E%3C/svg%3E" />
+
+    <!-- Primary Meta Tags -->
+    <title>ClaudeWizard - Claude Code 設定ファイル生成ウィザード</title>
+    <meta name="title" content="ClaudeWizard - Claude Code 設定ファイル生成ウィザード" />
+    <meta name="description" content="Claude Code の設定ファイル（CLAUDE.md / rules / hooks / SKILL.md）を質問に答えるだけで自動生成。ブラウザ完結・BYOK・無料プランあり。" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kikurage-en.github.io/claudewizard-web/" />
+    <meta property="og:title" content="ClaudeWizard - Claude Code 設定ファイル生成ウィザード" />
+    <meta property="og:description" content="Claude Code の設定ファイル一式を質問に答えるだけで自動生成。BYOK・ブラウザ完結・サーバー不要。" />
+    <meta property="og:site_name" content="ClaudeWizard" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="ClaudeWizard - Claude Code 設定ファイル生成ウィザード" />
+    <meta property="twitter:description" content="Claude Code の設定ファイル一式を質問に答えるだけで自動生成。" />
+
+    <!-- hreflang -->
+    <link rel="alternate" hreflang="ja" href="https://kikurage-en.github.io/claudewizard-web/#/ja/" />
+    <link rel="alternate" hreflang="en" href="https://kikurage-en.github.io/claudewizard-web/#/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://kikurage-en.github.io/claudewizard-web/" />
+
+    <!-- Fonts: non-render-blocking via preload/onload pattern -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+      crossorigin
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    <!-- GA4 (stub - configure with actual measurement ID) -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { window.dataLayer.push(arguments); }
+      gtag('js', new Date());
+      // gtag('config', 'G-XXXXXXXXXX'); // Configure with actual GA4 ID
+    </script>
+
+    <!-- Language detection and hash-based routing init -->
+    <script>
+      (function () {
+        var hash = window.location.hash;
+        if (!hash || hash === '#' || hash === '#/') {
+          var lang = navigator.language && navigator.language.toLowerCase().startsWith('ja') ? 'ja' : 'en';
+          window.location.replace(window.location.pathname + window.location.search + '#/' + lang + '/');
+        }
+      })();
+    </script>
+
+    <!-- Structured Data: SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ClaudeWizard",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "JPY",
+        "lowPrice": "0"
+      },
+      "description": "Claude Code の設定ファイル一式を質問に答えるだけで自動生成するウィザード。",
+      "url": "https://kikurage-en.github.io/claudewizard-web/"
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

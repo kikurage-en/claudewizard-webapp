@@ -1,0 +1,198 @@
+{
+  "common": {
+    "next": "次へ",
+    "back": "戻る",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "loading": "生成中...",
+    "error": "エラーが発生しました",
+    "skip": "スキップ",
+    "retry": "再試行",
+    "or": "または"
+  },
+  "nav": {
+    "top": "トップ",
+    "guide": "使い方",
+    "faq": "FAQ",
+    "github": "GitHub",
+    "start": "はじめる",
+    "language": "English",
+    "menu": "メニュー"
+  },
+  "hero": {
+    "title": "Claude Code の設定ファイル、\n質問に答えるだけで完成。",
+    "subtitle": "CLAUDE.md / rules / hooks / SKILL.md を一括生成。ブラウザ完結・BYOK・サーバー不要。",
+    "cta_primary": "無料で始める",
+    "cta_secondary": "使い方を見る"
+  },
+  "plans": {
+    "select_title": "プランを選択",
+    "select_subtitle": "用途に合ったプランをお選びください",
+    "target_label": "こんな方へ",
+    "files_label": "生成ファイル",
+    "free": {
+      "name": "フリー",
+      "tagline": "設定ファイルの全体像を理解する",
+      "description": "APIキー不要。固定テンプレートで設定ファイル一式をすぐに生成できます。",
+      "price": "¥0",
+      "price_note": "API不要",
+      "badge_api": "APIキー不要",
+      "target": "Claude Code を始めてみたい方",
+      "files_count": "4ファイル生成",
+      "cta": "フリーで始める"
+    },
+    "light": {
+      "name": "ライト",
+      "tagline": "プロジェクト専用の設定一式を手に入れる",
+      "description": "Claude API（BYOK）でプロジェクトに合わせた設定ファイルを生成します。",
+      "price": "無料",
+      "price_note": "API従量課金",
+      "badge_api": "APIキー必要",
+      "target": "どこから始めればいいか分からない方",
+      "files_count": "5ファイル生成",
+      "cta": "ライトで始める",
+      "coming_soon": "Phase 2 で公開予定"
+    },
+    "plus": {
+      "name": "プラス",
+      "tagline": "指示の構造設計で遵守率を最大化する",
+      "description": "マルチステップ生成で 150-200 指示の予算を最適配分した構造設計を提供します。",
+      "price": "有料",
+      "price_note": "APIキー + ライセンス",
+      "badge_api": "APIキー + ライセンス必要",
+      "target": "「書いたけど効いてる気がしない」方",
+      "files_count": "9〜11ファイル生成",
+      "cta": "プラスを購入する",
+      "coming_soon": "Phase 3 で公開予定",
+      "recommended": "RECOMMENDED"
+    }
+  },
+  "wizard": {
+    "question_of": "質問 {{current}} / {{total}}",
+    "back": "戻る",
+    "next": "OK / 次へ →",
+    "cancel": "キャンセル",
+    "generating": "設定ファイルを生成中...",
+    "tip_label": "💡 ヒント",
+    "q1": {
+      "title": "主にどの分野で Claude を使いますか？",
+      "subtitle": "最も近いものを選んでください",
+      "tip": "後から変更する場合は、もう一度ウィザードを実行してください。",
+      "options": {
+        "software": "ソフトウェア開発（Web・モバイル・API・インフラなど）",
+        "data-research": "データ分析・機械学習・リサーチ",
+        "writing": "文章作成・ドキュメント整備・コンテンツ制作",
+        "sns": "SNS 運用・マーケティング（投稿文作成・分析・企画など）",
+        "automation": "業務効率化・ワークフロー自動化",
+        "design": "デザイン・クリエイティブ制作",
+        "other": "その他・複数の分野にまたがる"
+      }
+    },
+    "q2": {
+      "title": "プロジェクト名を入力してください",
+      "subtitle": "CLAUDE.md のタイトルに使用されます",
+      "placeholder": "my-awesome-project",
+      "tip": "英数字・ハイフン・アンダースコアが使えます。"
+    },
+    "q3": {
+      "title": "主にどのような作業をしていますか？",
+      "subtitle": "最も近いものを選んでください",
+      "options": {
+        "create": "新しいものを作る（実装・執筆・設計など）",
+        "investigate": "問題を調査・修正する（デバッグ・調査・エラー解決）",
+        "improve": "既存のものを改善する（リファクタリング・編集・整理）",
+        "review": "レビュー・確認・品質チェック",
+        "mixed": "幅広い作業（作成・修正・調査など）"
+      }
+    },
+    "q4": {
+      "title": "主に使うツールや環境は？",
+      "subtitle": "最も近いものを選んでください",
+      "options": {
+        "programming": "プログラミング言語（TypeScript・Python・Go など）",
+        "office": "オフィス系ツール（Excel・Notion・Google Docs など）",
+        "creative": "クリエイティブツール（Figma・Canva・Illustrator など）",
+        "sns": "SNS プラットフォーム（X・Instagram・YouTube など）",
+        "cli": "コマンドライン・シェルスクリプト",
+        "other": "特にない・様々なツール"
+      }
+    },
+    "q5": {
+      "title": "Claude Code で一番達成したいことは？",
+      "subtitle": "一番の目標を選んでください",
+      "options": {
+        "speed": "作業スピードを上げたい",
+        "quality": "アウトプットの品質を高めたい",
+        "learning": "新しいことを素早く学びたい",
+        "team": "チーム・組織全体の生産性を上げたい"
+      }
+    },
+    "q6": {
+      "title": "備考・要望があれば入力してください",
+      "subtitle": "任意入力です。特定の制約、チームルール、注意点などを自由に記述できます",
+      "placeholder": "例: TypeScript strict モードを使用、コミットは英語で、など",
+      "tip": "入力しなくてもウィザードを完了できます。具体的な要望があれば反映されます。"
+    }
+  },
+  "api_key": {
+    "title": "Anthropic API キーを入力",
+    "subtitle": "ライトプランでは、あなたの Anthropic API キーを使ってファイルを生成します。",
+    "label": "Anthropic API キー",
+    "placeholder": "sk-ant-api03-...",
+    "note": "キーはブラウザのセッション内のみで保持され、タブを閉じると自動削除されます。サーバーには送信されません。",
+    "badge_browser": "ブラウザ完結",
+    "check1": "APIキーはサーバーに送信されません",
+    "check2": "sessionStorageに保持（タブを閉じると自動削除）",
+    "check3": "通信はHTTPS暗号化（ブラウザ↔api.anthropic.com直通）",
+    "show": "表示",
+    "hide": "非表示",
+    "cta": "ウィザードを始める →",
+    "get_key_link": "APIキーを取得"
+  },
+  "result": {
+    "title": "完成！",
+    "done_badge": "✨ DONE!",
+    "subtitle": "設定ファイルが生成されました",
+    "description": "ZIP をダウンロードして、プロジェクトのルートディレクトリに展開してください。",
+    "files_title": "生成されたファイル",
+    "consent_label": "利用規約に同意してダウンロードする",
+    "download_label": "ZIP をダウンロード",
+    "download_disabled": "利用規約に同意するとダウンロードできます",
+    "placement_guide": "使い方ガイドを見る",
+    "try_again": "もう一度生成する",
+    "zip_filename": "claudewizard-config.zip"
+  },
+  "errors": {
+    "api": {
+      "invalid_key": "APIキーが無効です。Anthropic Console で確認してください。",
+      "rate_limit": "リクエストが多すぎます。しばらく待ってから再試行してください。",
+      "server_error": "Claude API でエラーが発生しました。しばらく待ってから再試行してください。",
+      "timeout": "タイムアウトが発生しました。再試行してください。",
+      "cors": "CORS エラーが発生しました。ブラウザ拡張機能・広告ブロッカーをオフにして試してください。",
+      "content_safety": "入力内容に問題があります。表現を変えて再試行してください。"
+    },
+    "license": {
+      "invalid": "ライセンスキーが無効です。",
+      "expired": "ライセンスの有効期限が切れています。更新してください。",
+      "rate_limit": "ライセンス確認のリクエストが多すぎます。しばらく待ってください。"
+    },
+    "generation": {
+      "failed": "ファイルの生成に失敗しました。もう一度お試しください。",
+      "zip_failed": "ZIP の作成に失敗しました。ページを再読み込みして試してください。"
+    }
+  },
+  "legal": {
+    "terms": {
+      "title": "利用規約",
+      "body": "本サービス（ClaudeWizard）は AS IS（現状有姿）で提供されます。\n\n生成された設定ファイルはテンプレートであり、特定のプロジェクトへの適合性を保証するものではありません。生成物の利用により生じた損害について、運営者は責任を負いません。\n\nAPIキーの管理はユーザー自身の責任です。APIキーはブラウザのセッション内のみで保持され、サーバーには送信されません。\n\n本サービスは Anthropic の利用規約（BYOK モデル）に準拠しています。"
+    },
+    "privacy": {
+      "title": "プライバシーポリシー",
+      "body": "本サービスはアクセス解析のため Google Analytics 4（GA4）を使用しています。\n\n【収集するデータ】\nGA4 によるページビュー・イベントデータ（匿名化済み）\n\n【収集しないデータ】\nAPIキー、ライセンスキー、ウィザードへの入力内容はサーバーに送信されません。\n\n【Cookie】\nGA4 は Cookie を使用します。ブラウザの設定でオプトアウトできます。\n\n【第三者提供】\nGoogle LLC（データ処理委託）"
+    },
+    "consent_text": "利用規約",
+    "footer_terms": "利用規約",
+    "footer_privacy": "プライバシーポリシー",
+    "copyright": "© 2026 kikurage-en. MIT License."
+  }
+}
