@@ -14,6 +14,11 @@ build/
 *.log
 npm-debug.log*
 
+# テスト / カバレッジ成果物
+coverage/
+playwright-report/
+test-results/
+
 # Editor / OS
 .DS_Store
 .idea/

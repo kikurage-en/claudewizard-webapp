@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { callClaude, AnthropicClientError } from '../anthropicClient'
 
-// vi.mock factory 内では "mock" プレフィックス変数は hoisting 後でも参照可能
-const mockCreate = vi.fn()
+// vi.mock factory 内で参照するモックは vi.hoisted() で巻き上げる
+// （vitest 2+ で "mock" プレフィックス変数の自動 hoisting が廃止されたため明示する）
+const { mockCreate } = vi.hoisted(() => ({ mockCreate: vi.fn() }))
 
 vi.mock('@anthropic-ai/sdk', () => {
   class MockAPIError extends Error {
@@ -76,6 +77,37 @@ describe('callClaude', () => {
 
     await expect(callClaude('sk-ant-test', 'system', 'user')).rejects.toMatchObject({
       code: 'cors',
+    })
+  })
+
+  it('503 エラーは server コードで AnthropicClientError をスロー', async () => {
+    const { APIError } = await import('@anthropic-ai/sdk')
+    mockCreate.mockRejectedValue(
+      new (APIError as unknown as new (status: number, msg: string) => Error)(503, 'Service Unavailable')
+    )
+
+    await expect(callClaude('sk-ant-test', 'system', 'user')).rejects.toMatchObject({
+      code: 'server',
+    })
+  })
+
+  it('AbortError は timeout コードで AnthropicClientError をスロー', async () => {
+    // ブラウザの fetch タイムアウト時に投げられる AbortError を再現
+    const abortErr = new Error('The operation was aborted')
+    abortErr.name = 'AbortError'
+    mockCreate.mockRejectedValue(abortErr)
+
+    await expect(callClaude('sk-ant-test', 'system', 'user')).rejects.toMatchObject({
+      name: 'AnthropicClientError',
+      code: 'timeout',
+    })
+  })
+
+  it('message に "timeout" を含むエラーは timeout コードで AnthropicClientError をスロー', async () => {
+    mockCreate.mockRejectedValue(new Error('Connection timeout exceeded'))
+
+    await expect(callClaude('sk-ant-test', 'system', 'user')).rejects.toMatchObject({
+      code: 'timeout',
     })
   })
 

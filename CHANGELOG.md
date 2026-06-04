@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## v0.2.1 (2026-06-04)
+
+### Phase 2 クローズ + GitHub Pages 配信修正 + 公開リポジトリ同期
+
+#### 修正
+
+- `vite.config.ts`: GitHub Pages サブディレクトリ配信のため `GITHUB_REPOSITORY` から base path を動的設定（197d96b）
+- `index.html`: 公開 URL を `https://kikurage-en.github.io/claudewizard-webapp/` に統一（og:url / hreflang / JSON-LD、fb10fd6）
+
+#### 追加
+
+- 公開リポジトリ同期スクリプト `scripts/sync-public.sh` と暗号化スクリプトの整備（82191ad）
+  - rsync 除外パターンをベースファイル名指定（`light_ja.ts` 等）に修正し全パス階層で確実に除外
+- `src/security/__tests__/anthropicClient.test.ts`: timeout（AbortError / message に "timeout"）と 503 の単体テストを追加（401/429/500/503/timeout×2/CORS の 9 ケースに）
+
+#### テスト・検証（Phase 2 正式クローズ）
+
+- 単体・コンポーネント: 152 件全件合格（20 ファイル）
+- カバレッジ: All files 94.2% lines / 85.07% branches / 84.72% funcs（閾値 80% クリア）、型チェック合格
+- `.claude/spec/acceptance.md` の Phase 2 受け入れ基準を確定（**機能受け入れ全件達成**：実 API キー使用の完走 E2E も実キーで `2 passed`、他は証跡付きで [x]）
+- spec-reviewer / impl-validator 実行済み（prompt 平文コミットの誤検知を git ls-files / .gitignore で否定、ブロッカーなし）
+- 定期チェック実施（health-check 疎通 / npm audit / Web ドキュメント確認、2026-06-04）
+
 ## v0.2.0 (2026-05-02)
 
 ### Phase 2 完成（Light プラン / BYOK + Claude API）

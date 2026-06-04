@@ -33,7 +33,7 @@ describe('downloadBlob', () => {
     clickSpy = vi.fn()
     appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
       if (node instanceof HTMLAnchorElement) {
-        node.click = clickSpy
+        node.click = clickSpy as unknown as () => void
       }
       return node
     })
@@ -61,7 +61,7 @@ describe('downloadBlob', () => {
     let capturedAnchor: HTMLAnchorElement | null = null
     appendChildSpy.mockImplementation((node: Node) => {
       if (node instanceof HTMLAnchorElement) {
-        node.click = clickSpy
+        node.click = clickSpy as unknown as () => void
         capturedAnchor = node
       }
       return node
