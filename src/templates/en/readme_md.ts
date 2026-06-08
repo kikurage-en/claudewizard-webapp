@@ -9,15 +9,9 @@ It is intended to be developed and operated together with Claude Code (claude.co
 
 ## Setup
 
-\`\`\`bash
-# Clone (example — replace with your real URL)
-git clone https://github.com/your-account/{{projectName}}.git
-cd {{projectName}}
-
-# Install dependencies and start (replace with your real commands)
-npm install
-npm run dev
-\`\`\`
+1. Get this repository (or the generated set of configuration files).
+2. Place \`CLAUDE.md\` and \`.claude/\` at the root of your project.
+3. Open the project with Claude Code (claude.com/code). Claude will follow the rules in CLAUDE.md.
 
 ## Claude Code Configuration Files
 

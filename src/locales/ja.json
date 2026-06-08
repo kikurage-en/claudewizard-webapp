@@ -132,6 +132,19 @@
       "subtitle": "任意入力です。特定の制約、チームルール、注意点などを自由に記述できます",
       "placeholder": "例: TypeScript strict モードを使用、コミットは英語で、など",
       "tip": "入力しなくてもウィザードを完了できます。具体的な要望があれば反映されます。"
+    },
+    "stack": {
+      "title": "主にどの言語・技術を使いますか？",
+      "subtitle": "CLAUDE.md の Tech Stack に反映されます。最も近いものを選んでください",
+      "tip": "コードを書かない場合は「コードは書かない」を選んでください。",
+      "options": {
+        "ts": "TypeScript / JavaScript（Node.js・React など）",
+        "python": "Python",
+        "go": "Go",
+        "rust": "Rust",
+        "other-code": "その他のプログラミング言語",
+        "non-code": "コードは書かない（文章・SNS・デザインなど）"
+      }
     }
   },
   "api_key": {

@@ -1,5 +1,6 @@
 import type { Plan } from '../wizard/types'
 import { parseAnswers } from './parseAnswers'
+import { buildStackVars } from './stackProfiles'
 import { render } from './render'
 import { buildZip } from './zipBuilder'
 import { getManifest } from '../templates/manifest'
@@ -67,7 +68,10 @@ export async function generate(
     throw new NotImplementedError(plan)
   }
 
-  const vars = parseAnswers(answers, lang)
+  // Free 経路のみ到達（light は早期 return / plus は throw）。
+  // Tech Stack 質問（stack）の回答から Tech Stack / Build & Test / Architecture を実値化する。
+  // buildStackVars は Free 専用＝Light/Plus は parseAnswers のみで非到達（per-tier 非波及）。
+  const vars = { ...parseAnswers(answers, lang), ...buildStackVars(answers['stack'] ?? 'other-code', lang) }
   const templates = await loadTemplates(lang)
   const manifest = getManifest(plan)
 

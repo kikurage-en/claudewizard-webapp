@@ -9,19 +9,11 @@ export const template = `# {{projectName}}
 
 ## Tech Stack
 
-このプロジェクトで使う言語・フレームワーク・主要ツールを書く。
-（例: TypeScript / React、Python / pandas など。実際の構成に合わせて調整する）
+{{techStack}}
 
 ## Build & Test
 
-Claude が推測できない具体的なコマンドのみ書く。
-
-\`\`\`bash
-# 例（実際のコマンドに置き換える）
-npm install
-npm test
-npm run build
-\`\`\`
+{{buildCommands}}
 
 ## Code Style
 
@@ -34,8 +26,7 @@ npm run build
 
 ## Architecture
 
-主要ディレクトリの役割を 4〜5 行で書く。
-（例: src/ アプリ本体 / tests/ テスト / docs/ ドキュメント。実際の構成に合わせて調整する）
+{{architecture}}
 
 ## Security
 

@@ -9,15 +9,9 @@ Claude Code（claude.com/code）と組み合わせて開発・運用すること
 
 ## セットアップ
 
-\`\`\`bash
-# 取得（例。実際の URL に置き換える）
-git clone https://github.com/your-account/{{projectName}}.git
-cd {{projectName}}
-
-# 依存関係のインストール・起動（実際のコマンドに置き換える）
-npm install
-npm run dev
-\`\`\`
+1. このリポジトリ（または生成された設定ファイル一式）を取得する。
+2. \`CLAUDE.md\` と \`.claude/\` をプロジェクトの直下に配置する。
+3. Claude Code（claude.com/code）でプロジェクトを開く。CLAUDE.md のルールに従って作業が始まる。
 
 ## Claude Code 設定ファイル
 

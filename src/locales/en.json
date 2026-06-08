@@ -132,6 +132,19 @@
       "subtitle": "Optional. You can describe specific constraints, team rules, or preferences.",
       "placeholder": "e.g. TypeScript strict mode, commit messages in English, etc.",
       "tip": "You can skip this and still complete the wizard. Any specific requirements here will be reflected in the output."
+    },
+    "stack": {
+      "title": "Which language or technology do you mainly use?",
+      "subtitle": "This is reflected in the Tech Stack section of CLAUDE.md. Choose the closest option.",
+      "tip": "If you don't write code, choose \"I don't write code\".",
+      "options": {
+        "ts": "TypeScript / JavaScript (Node.js, React, etc.)",
+        "python": "Python",
+        "go": "Go",
+        "rust": "Rust",
+        "other-code": "Other programming language",
+        "non-code": "I don't write code (writing, SNS, design, etc.)"
+      }
     }
   },
   "api_key": {

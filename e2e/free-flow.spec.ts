@@ -16,11 +16,11 @@ test.describe('Free プラン完走フロー', () => {
     const freeCard = page.getByRole('button', { name: /フリー/ })
     await freeCard.click()
     await expect(page).toHaveURL(/#\/ja\/wizard/)
-    // Free は再設計で 2 問（分野・名前）
-    await expect(page.getByText(/質問 1 \/ 2/)).toBeVisible()
+    // Free は再設計で 3 問（分野・名前・言語）
+    await expect(page.getByText(/質問 1 \/ 3/)).toBeVisible()
   })
 
-  test('Q1〜Q2を回答して完了画面に到達する', async ({ page }) => {
+  test('Q1〜Q3を回答して完了画面に到達する', async ({ page }) => {
     const freeCard = page.getByRole('button', { name: /フリー/ })
     await freeCard.click()
     await expect(page).toHaveURL(/#\/ja\/wizard/)
@@ -29,8 +29,12 @@ test.describe('Free プラン完走フロー', () => {
     await page.locator('button[aria-pressed]').first().click()
     await page.getByRole('button', { name: /次へ/i }).click()
 
-    // Q2: プロジェクト名を入力（最後の質問 → 生成 → 完了）
+    // Q2: プロジェクト名を入力
     await page.getByRole('textbox').fill('TestProject')
+    await page.getByRole('button', { name: /次へ/i }).click()
+
+    // Q3: 言語を選択（最後の質問 → 生成 → 完了）
+    await page.locator('button[aria-pressed]').first().click()
     await page.getByRole('button', { name: /次へ/i }).click()
 
     await expect(page).toHaveURL(/#\/ja\/complete/, { timeout: 15000 })
@@ -44,8 +48,11 @@ test.describe('Free プラン完走フロー', () => {
     // Q1
     await page.locator('button[aria-pressed]').first().click()
     await page.getByRole('button', { name: /次へ/i }).click()
-    // Q2 (最後)
+    // Q2
     await page.getByRole('textbox').fill('TestProject')
+    await page.getByRole('button', { name: /次へ/i }).click()
+    // Q3 (最後)
+    await page.locator('button[aria-pressed]').first().click()
     await page.getByRole('button', { name: /次へ/i }).click()
 
     await expect(page).toHaveURL(/#\/ja\/complete/, { timeout: 15000 })
@@ -61,6 +68,9 @@ test.describe('Free プラン完走フロー', () => {
     await page.locator('button[aria-pressed]').first().click()
     await page.getByRole('button', { name: /次へ/i }).click()
     await page.getByRole('textbox').fill('TestProject')
+    await page.getByRole('button', { name: /次へ/i }).click()
+    // Q3: 言語（最初の選択肢 = TypeScript / JavaScript）
+    await page.locator('button[aria-pressed]').first().click()
     await page.getByRole('button', { name: /次へ/i }).click()
 
     await expect(page).toHaveURL(/#\/ja\/complete/, { timeout: 15000 })
@@ -95,10 +105,11 @@ test.describe('Free プラン完走フロー', () => {
     const fileEntries = Object.values(zip.files).filter((f) => !f.dir)
     expect(fileEntries.length).toBe(4)
 
-    // 接地検証: 生成 CLAUDE.md に TODO 文言が残っていない
+    // 接地検証: 生成 CLAUDE.md に記入指示が残っておらず、stack（TypeScript）が実値化されている
     const claudeMd = await zip.files['CLAUDE.md'].async('string')
     expect(claudeMd).toContain('TestProject')
-    expect(claudeMd).not.toContain('ここに記載する')
+    expect(claudeMd).not.toMatch(/書く。|に置き換える/)
+    expect(claudeMd).toContain('TypeScript') // 最初の言語選択肢の実値化
   })
 
   test('戻るボタンで前の質問に戻れる', async ({ page }) => {
@@ -110,11 +121,11 @@ test.describe('Free プラン完走フロー', () => {
     await page.getByRole('button', { name: /次へ/i }).click()
 
     // Q2に移動した後、戻るボタンが表示される
-    await expect(page.getByText(/質問 2 \/ 2/)).toBeVisible()
+    await expect(page.getByText(/質問 2 \/ 3/)).toBeVisible()
     await expect(page.getByRole('button', { name: /戻る/i })).toBeVisible()
 
     // 戻るをクリック
     await page.getByRole('button', { name: /戻る/i }).click()
-    await expect(page.getByText(/質問 1 \/ 2/)).toBeVisible()
+    await expect(page.getByText(/質問 1 \/ 3/)).toBeVisible()
   })
 })

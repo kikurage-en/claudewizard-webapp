@@ -83,8 +83,27 @@ export const Q6: Question = {
   optional: true,
 }
 
-// Free: 静的テンプレで実際に出力を動かす分野・名前の2問のみ（再設計）
-export const FREE_QUESTIONS: Question[] = [Q1_DOMAIN, Q2_NAME]
+// Free 専用の Tech Stack 質問（id=stack。Light/Plus の q3=worktype と衝突しない独立 id）。
+// 回答（言語）から静的テンプレの Tech Stack / Build & Test / Architecture を実値化する（stackProfiles.ts）。
+// 言語名は projectName/domain と同じく「静的でも効く軸」。
+const Q_STACK: Question = {
+  id: 'stack',
+  type: 'choice',
+  titleKey: 'wizard.stack.title',
+  subtitleKey: 'wizard.stack.subtitle',
+  tipKey: 'wizard.stack.tip',
+  options: [
+    { value: 'ts', labelKey: 'wizard.stack.options.ts' },
+    { value: 'python', labelKey: 'wizard.stack.options.python' },
+    { value: 'go', labelKey: 'wizard.stack.options.go' },
+    { value: 'rust', labelKey: 'wizard.stack.options.rust' },
+    { value: 'other-code', labelKey: 'wizard.stack.options.other-code' },
+    { value: 'non-code', labelKey: 'wizard.stack.options.non-code' },
+  ],
+}
+
+// Free: 静的テンプレで実際に出力を動かす分野・名前・言語の3問（再設計＋Tech Stack 実値化）
+export const FREE_QUESTIONS: Question[] = [Q1_DOMAIN, Q2_NAME, Q_STACK]
 
 // Light / Plus: API 生成が回答を活かせるため q1-q6 をフルに使う（独立定義）
 export const LIGHT_PLUS_QUESTIONS: Question[] = [

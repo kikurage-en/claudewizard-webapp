@@ -8,6 +8,7 @@ const mockAnswers = {
   q3: 'create',
   q4: 'programming',
   q5: 'quality',
+  stack: 'ts',
 }
 
 describe('generate', () => {
@@ -70,7 +71,8 @@ describe('generate', () => {
     expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(4)
     const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
     expect(claudeMd).toContain('awesome-api')
-    expect(claudeMd).not.toContain('ここに記載する')
+    // 記入指示・命令形が出力に残っていない（実文言ベース・false PASS 撲滅）
+    expect(claudeMd).not.toMatch(/書く。|に置き換える|合わせて調整する/)
     // q3/q4/q5 既定値ラベルが出力に現れない（静的テンプレが装飾依存していないことの証明）
     expect(claudeMd).not.toContain('幅広い作業') // workType ラベル
     expect(claudeMd).not.toContain('アウトプット品質の向上') // goal ラベル
@@ -83,5 +85,23 @@ describe('generate', () => {
     expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(4)
     const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
     expect(claudeMd).toContain('minimal-proj')
+  })
+
+  it('Free: stack=ts で Tech Stack が実値化（TypeScript 出現・go 非出現・コマンド非断定）', async () => {
+    const blob = await generate('free', 'ja', { q1: 'software', q2: 'ts-proj', stack: 'ts' })
+    const zip = await JSZip.loadAsync(blob)
+    const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
+    expect(claudeMd).toContain('TypeScript')
+    expect(claudeMd).not.toContain('言語: Go')
+    // パッケージマネージャが分岐する ts は推測コマンドを断定しない（pivot の核心）
+    expect(claudeMd).not.toMatch(/npm (install|test|run)/)
+  })
+
+  it('Free: stack 未指定でも記入指示が出ない（other-code フォールバック）', async () => {
+    const blob = await generate('free', 'ja', { q1: 'software', q2: 'no-stack' })
+    const zip = await JSZip.loadAsync(blob)
+    const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
+    expect(claudeMd).not.toMatch(/書く。|に置き換える|合わせて調整する/)
+    expect(claudeMd).toContain('複数またはその他')
   })
 })

@@ -9,19 +9,11 @@ Claude Code configuration for this {{domain}} project. Claude follows the rules 
 
 ## Tech Stack
 
-List the languages, frameworks, and key tools used in this project.
-(e.g. TypeScript / React, Python / pandas — adjust to your actual setup)
+{{techStack}}
 
 ## Build & Test
 
-Document only the concrete commands Claude cannot infer.
-
-\`\`\`bash
-# Example (replace with your real commands)
-npm install
-npm test
-npm run build
-\`\`\`
+{{buildCommands}}
 
 ## Code Style
 
@@ -34,8 +26,7 @@ npm run build
 
 ## Architecture
 
-Describe the role of the main directories in 4-5 lines.
-(e.g. src/ app code, tests/ tests, docs/ documentation — adjust to your actual setup)
+{{architecture}}
 
 ## Security
 
