@@ -50,6 +50,48 @@ export async function callClaude(
   return block.text
 }
 
+export type ClaudeResponseWithUsage = {
+  text: string
+  inputTokens: number
+  outputTokens: number
+  stopReason: string | null
+}
+
+/**
+ * callClaude のトークン使用量つき版。Plus のマルチステップ生成で
+ * iteration 横断の予算ガード（api-documentation.md「AI/API利用の安全制御」MUST）に使う。
+ * callClaude は不変のまま残し、buildClient / mapError を共有する。
+ */
+export async function callClaudeWithUsage(
+  apiKey: string,
+  systemPrompt: string,
+  userMessage: string,
+  maxTokens = 8192
+): Promise<ClaudeResponseWithUsage> {
+  const client = buildClient(apiKey)
+
+  let response: Awaited<ReturnType<typeof client.messages.create>>
+  try {
+    response = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }],
+    })
+  } catch (err) {
+    throw mapError(err)
+  }
+
+  const block = response.content[0]
+  if (block.type !== 'text') throw new AnthropicClientError('Unexpected response type', 'unknown')
+  return {
+    text: block.text,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+    stopReason: response.stop_reason,
+  }
+}
+
 function mapError(err: unknown): AnthropicClientError {
   if (err instanceof APIError) {
     if (err.status === 401) return new AnthropicClientError(err.message, 'auth')

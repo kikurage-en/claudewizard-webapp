@@ -13,6 +13,8 @@ export default defineConfig({
   define: {
     __LIGHT_SYSTEM_PROMPT_JA__: JSON.stringify(''),
     __LIGHT_SYSTEM_PROMPT_EN__: JSON.stringify(''),
+    __PLUS_SYSTEM_PROMPT_JA__: JSON.stringify(''),
+    __PLUS_SYSTEM_PROMPT_EN__: JSON.stringify(''),
   },
   test: {
     environment: 'jsdom',

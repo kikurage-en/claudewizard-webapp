@@ -1,33 +1,33 @@
 export const template = `# {{projectName}}
 
-{{domain}} project.
+A {{domain}} project. Includes a set of Claude Code configuration files.
 
 ## Overview
 
-This project is a {{domain}} project using {{tool}}.
-The primary work is **{{workType}}** with the goal of **{{goal}}**.
+{{projectName}} is a project for {{domain}}.
+It is intended to be developed and operated together with Claude Code (claude.com/code).
 
 ## Setup
 
 \`\`\`bash
-# Clone repository
-git clone <repository-url>
+# Clone (example — replace with your real URL)
+git clone https://github.com/your-account/{{projectName}}.git
 cd {{projectName}}
 
-# Install dependencies
-npm install  # or use appropriate package manager
-
-# Start dev server
+# Install dependencies and start (replace with your real commands)
+npm install
 npm run dev
 \`\`\`
 
-## Claude Code Integration
+## Claude Code Configuration Files
 
-This project includes Claude Code configuration files:
+This project includes the following Claude Code configuration:
 
-- \`CLAUDE.md\` - Claude Code behavior settings
-- \`.claude/skills/main/SKILL.md\` - Available skills
-- \`.claude/rules/security-guidelines.md\` - Security guidelines
+| File | Role |
+|------|------|
+| \`CLAUDE.md\` | Claude Code behavior rules and project settings |
+| \`.claude/skills/main/SKILL.md\` | Available skills |
+| \`.claude/rules/security-guidelines.md\` | Security guidelines |
 
 ## License
 

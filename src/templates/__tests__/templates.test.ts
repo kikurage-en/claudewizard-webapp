@@ -9,87 +9,87 @@ import { template as enReadmeMd } from '../en/readme_md'
 import { template as enSkillMd } from '../en/skill_md'
 import { template as enSecurityMd } from '../en/security_guidelines_md'
 
-const vars = {
-  projectName: 'test-project',
-  domain: 'ソフトウェア開発',
-  workType: '新しいものを作る',
-  tool: 'プログラミング言語',
-  goal: '作業スピードの向上',
-}
+// Free 再設計: テンプレは projectName + domain のみ使用（静的・完成・dotfiles/CLI 接地）
+const vars = { projectName: 'test-project', domain: 'ソフトウェア開発' }
+const enVars = { projectName: 'test-project', domain: 'Software Development' }
 
-const enVars = {
-  projectName: 'test-project',
-  domain: 'Software Development',
-  workType: 'Creating new things',
-  tool: 'Programming languages',
-  goal: 'Increasing work speed',
-}
+// TODO/プレースホルダ文言（"粗い"の症状）。再設計で完全撤廃されていること。
+const TODO_PATTERNS = [/ここに記載する/, /Describe .* here/, /<repository-url>/]
 
-describe('Japanese templates', () => {
-  it('claude_md renders without errors', () => {
-    const result = render(jaClaudeMd, vars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('ソフトウェア開発')
-    expect(result).toContain('新しいものを作る')
+describe('Japanese Free templates（dotfiles/CLI 接地）', () => {
+  it('claude_md: projectName/domain 反映・TODO なし・≤100行・構造あり・MUST・@参照', () => {
+    const r = render(jaClaudeMd, vars)
+    expect(r).toContain('test-project')
+    expect(r).toContain('ソフトウェア開発')
+    for (const p of TODO_PATTERNS) expect(r).not.toMatch(p)
+    expect(r.split('\n').length).toBeLessThanOrEqual(100) // CLI project-concept #5（≤100行）
+    expect((r.match(/^## /gm) ?? []).length).toBeGreaterThanOrEqual(6) // セクション構造
+    expect(r).toContain('MUST') // dotfiles 12-rule 由来
+    expect(r).toContain('@.claude/rules/security-guidelines.md') // @参照
   })
 
-  it('readme_md renders without errors', () => {
-    const result = render(jaReadmeMd, vars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('プログラミング言語')
+  it('readme_md: projectName 反映・TODO/プレースホルダなし', () => {
+    const r = render(jaReadmeMd, vars)
+    expect(r).toContain('test-project')
+    for (const p of TODO_PATTERNS) expect(r).not.toMatch(p)
   })
 
-  it('skill_md renders without errors', () => {
-    const result = render(jaSkillMd, vars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('/verify')
+  it('skill_md: YAML frontmatter + projectName + /verify', () => {
+    const r = render(jaSkillMd, vars)
+    expect(r.startsWith('---')).toBe(true)
+    expect(r).toContain('test-project')
+    expect(r).toContain('/verify')
+    for (const p of TODO_PATTERNS) expect(r).not.toMatch(p)
   })
 
-  it('security_guidelines_md renders without errors', () => {
-    const result = render(jaSecurityMd, vars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('セキュリティガイドライン')
+  it('security_guidelines_md renders（Free/Light 共有・Slice1 では非改変）', () => {
+    const r = render(jaSecurityMd, vars)
+    expect(r).toContain('test-project')
+    expect(r).toContain('セキュリティガイドライン')
   })
 })
 
-describe('English templates', () => {
-  it('claude_md renders without errors', () => {
-    const result = render(enClaudeMd, enVars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('Software Development')
-    expect(result).toContain('Creating new things')
+describe('English Free templates（dotfiles/CLI 接地）', () => {
+  it('claude_md: grounded・no TODO・≤100行・structure・MUST', () => {
+    const r = render(enClaudeMd, enVars)
+    expect(r).toContain('test-project')
+    expect(r).toContain('Software Development')
+    for (const p of TODO_PATTERNS) expect(r).not.toMatch(p)
+    expect(r.split('\n').length).toBeLessThanOrEqual(100)
+    expect((r.match(/^## /gm) ?? []).length).toBeGreaterThanOrEqual(6)
+    expect(r).toContain('MUST')
   })
 
-  it('readme_md renders without errors', () => {
-    const result = render(enReadmeMd, enVars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('Programming languages')
+  it('readme_md: no TODO/placeholder', () => {
+    const r = render(enReadmeMd, enVars)
+    expect(r).toContain('test-project')
+    for (const p of TODO_PATTERNS) expect(r).not.toMatch(p)
   })
 
-  it('skill_md renders without errors', () => {
-    const result = render(enSkillMd, enVars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('/verify')
+  it('skill_md: frontmatter + /verify', () => {
+    const r = render(enSkillMd, enVars)
+    expect(r.startsWith('---')).toBe(true)
+    expect(r).toContain('test-project')
+    expect(r).toContain('/verify')
+    for (const p of TODO_PATTERNS) expect(r).not.toMatch(p)
   })
 
-  it('security_guidelines_md renders without errors', () => {
-    const result = render(enSecurityMd, enVars)
-    expect(result).toContain('test-project')
-    expect(result).toContain('Security Guidelines')
+  it('security_guidelines_md renders', () => {
+    const r = render(enSecurityMd, enVars)
+    expect(r).toContain('test-project')
+    expect(r).toContain('Security Guidelines')
   })
 })
 
-describe('template variable completeness', () => {
-  it('all ja templates have matching placeholder variables', () => {
-    const allTemplates = [jaClaudeMd, jaReadmeMd, jaSkillMd, jaSecurityMd]
-    for (const tmpl of allTemplates) {
+describe('Free テンプレは projectName + domain のみに依存（静的の限界に逆算）', () => {
+  // q3/q4/q5 由来の変数を渡さなくても render が成功する＝それらに依存しないことの証明
+  it('ja: renders with only projectName + domain', () => {
+    for (const tmpl of [jaClaudeMd, jaReadmeMd, jaSkillMd, jaSecurityMd]) {
       expect(() => render(tmpl, vars)).not.toThrow()
     }
   })
-
-  it('all en templates have matching placeholder variables', () => {
-    const allTemplates = [enClaudeMd, enReadmeMd, enSkillMd, enSecurityMd]
-    for (const tmpl of allTemplates) {
+  it('en: renders with only projectName + domain', () => {
+    for (const tmpl of [enClaudeMd, enReadmeMd, enSkillMd, enSecurityMd]) {
       expect(() => render(tmpl, enVars)).not.toThrow()
     }
   })

@@ -34,11 +34,20 @@ describe('wizardReducer', () => {
   })
 
   it('NEXT does not exceed total questions', () => {
+    // Free は 2 問（再設計）→ 最大 index は 1
     let state = createInitialState('free')
     for (let i = 0; i < 10; i++) {
       state = wizardReducer(state, { type: 'NEXT' })
     }
-    expect(state.currentIndex).toBe(4)
+    expect(state.currentIndex).toBe(1)
+  })
+
+  it('Light は 6 問のため最大 index は 5', () => {
+    let state = createInitialState('light')
+    for (let i = 0; i < 10; i++) {
+      state = wizardReducer(state, { type: 'NEXT' })
+    }
+    expect(state.currentIndex).toBe(5)
   })
 
   it('BACK decrements currentIndex', () => {

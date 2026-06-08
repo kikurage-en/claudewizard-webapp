@@ -31,7 +31,7 @@ describe('WizardPage', () => {
 
   it('Q1が最初に表示される', () => {
     renderWizardPage()
-    expect(screen.getByText(/質問 1 \/ 5/)).toBeInTheDocument()
+    expect(screen.getByText(/質問 1 \/ 2/)).toBeInTheDocument()
   })
 
   it('プログレスバーが表示される', () => {

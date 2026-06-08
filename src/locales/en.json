@@ -33,7 +33,7 @@
     "free": {
       "name": "Free",
       "tagline": "Understand the config file structure",
-      "description": "No API key needed. Generate a set of config files from fixed templates instantly.",
+      "description": "No API key needed. Instantly generate a complete, best-practice set of config files (CLAUDE.md, README, SKILL, security rules) — a starting point for understanding Claude Code's structure.",
       "price": "$0",
       "price_note": "No API required",
       "badge_api": "No API key needed",

@@ -57,4 +57,31 @@ describe('generate', () => {
     expect(claudeMd).toContain('awesome-api')
     expect(claudeMd).toContain('Software Development')
   })
+
+  // --- Free 再設計（2問・静的完成テンプレ）の deterministic 検証 ---
+
+  it('Free: 旧5問state（余分な q3-q5/q6 を含む）でも 4 ファイル・projectName 反映・TODO なし', async () => {
+    // 再設計前の 5-6 問フローの回答が残っていても新フロー（q1/q2 のみ使用）で正しく動く（migration/F3）
+    const legacyAnswers = {
+      q1: 'software', q2: 'awesome-api', q3: 'create', q4: 'programming', q5: 'quality', q6: 'note',
+    }
+    const blob = await generate('free', 'ja', legacyAnswers)
+    const zip = await JSZip.loadAsync(blob)
+    expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(4)
+    const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
+    expect(claudeMd).toContain('awesome-api')
+    expect(claudeMd).not.toContain('ここに記載する')
+    // q3/q4/q5 既定値ラベルが出力に現れない（静的テンプレが装飾依存していないことの証明）
+    expect(claudeMd).not.toContain('幅広い作業') // workType ラベル
+    expect(claudeMd).not.toContain('アウトプット品質の向上') // goal ラベル
+  })
+
+  it('Free: q1/q2 のみでも 4 ファイル生成', async () => {
+    const minimal = { q1: 'software', q2: 'minimal-proj' }
+    const blob = await generate('free', 'ja', minimal)
+    const zip = await JSZip.loadAsync(blob)
+    expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(4)
+    const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
+    expect(claudeMd).toContain('minimal-proj')
+  })
 })

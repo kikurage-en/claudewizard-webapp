@@ -29,6 +29,11 @@ export default defineConfig(({ mode }) => {
   const lightPromptJa = key ? decryptEncFile('src/prompts/light_ja.enc', key) : ''
   const lightPromptEn = key ? decryptEncFile('src/prompts/light_en.enc', key) : ''
 
+  // Plus 用 prompt（plus_*.enc 未作成時は decryptEncFile が '' を返す）。
+  // Phase 3 スライス A 時点では .enc 未provision のため '' = getPlusSystemPrompt が致命エラーを投げる。
+  const plusPromptJa = key ? decryptEncFile('src/prompts/plus_ja.enc', key) : ''
+  const plusPromptEn = key ? decryptEncFile('src/prompts/plus_en.enc', key) : ''
+
   // GitHub Actions の GITHUB_REPOSITORY からリポジトリ名を抽出して base に設定
   // 公開リポジトリ（kikurage-en/claudewizard-webapp）→ '/claudewizard-webapp/'
   // ローカル開発（dev / preview / test）→ '/'
@@ -51,6 +56,8 @@ export default defineConfig(({ mode }) => {
     define: {
       __LIGHT_SYSTEM_PROMPT_JA__: JSON.stringify(lightPromptJa),
       __LIGHT_SYSTEM_PROMPT_EN__: JSON.stringify(lightPromptEn),
+      __PLUS_SYSTEM_PROMPT_JA__: JSON.stringify(plusPromptJa),
+      __PLUS_SYSTEM_PROMPT_EN__: JSON.stringify(plusPromptEn),
     },
   }
 })

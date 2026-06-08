@@ -33,7 +33,7 @@
     "free": {
       "name": "フリー",
       "tagline": "設定ファイルの全体像を理解する",
-      "description": "APIキー不要。固定テンプレートで設定ファイル一式をすぐに生成できます。",
+      "description": "APIキー不要。ベストプラクティスに沿った完成済みの設定ファイル一式（CLAUDE.md・README・SKILL・セキュリティルール）を即生成。Claude Code の構造を理解する出発点に。",
       "price": "¥0",
       "price_note": "API不要",
       "badge_api": "APIキー不要",

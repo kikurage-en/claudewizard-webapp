@@ -1,57 +1,45 @@
-export const template = `# {{projectName}} Skills
+export const template = `---
+name: main
+description: |
+  Main skill for {{projectName}}. Basic flow for working on {{domain}} tasks with Claude Code.
 
-This file lists the skills available for Claude Code.
+  [Trigger] /main, "start working on {{domain}}", etc.
+---
 
-## /verify - Implementation Verification
+# {{projectName}} Main Skill
 
-Verifies generated implementations.
+The basic skill for using Claude Code on this {{domain}} project.
 
-### Usage
+## Overview
 
-\`\`\`
-/verify
-\`\`\`
+- **Domain**: {{domain}}
+- **Purpose**: Work efficiently on {{domain}} tasks
 
-### Process
+## Main Features
 
-1. Code review
-2. Test verification
-3. Spec consistency check
-4. Quality standards check
+Basic helper commands available in this project:
 
-## /improve - Improvement Suggestions
+### /verify — Verify implementations and deliverables
+Review what was produced and check quality and consistency.
 
-Provides improvement suggestions for code and design.
+### /improve — Improvement suggestions
+Analyze the current state and present prioritized improvements.
 
-### Usage
+### /review — Review
+Review the diff and comment from quality and security perspectives.
 
-\`\`\`
-/improve [target file or component]
-\`\`\`
+## Workflow
 
-### Process
+1. Clarify the task (goal, constraints, definition of done)
+2. Implement with the minimum change
+3. Verify with /verify, and refine with /improve if needed
 
-1. Analyze current implementation
-2. Identify improvement points
-3. Present concrete improvement proposals
-4. Prioritized suggestions
+## Configuration Files
 
-## /review - Code Review
-
-Performs code review on changes.
-
-### Usage
-
-\`\`\`
-/review
-\`\`\`
-
-### Process
-
-1. Check diff changes
-2. Code quality check
-3. Security verification
-4. Generate review comments
+| File | Role |
+|------|------|
+| \`CLAUDE.md\` | Behavior rules and project settings |
+| \`.claude/rules/security-guidelines.md\` | Security guidelines |
 `
 
 export default template

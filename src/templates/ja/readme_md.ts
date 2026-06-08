@@ -1,33 +1,33 @@
 export const template = `# {{projectName}}
 
-{{domain}} プロジェクト。
+{{domain}} のプロジェクト。Claude Code の設定ファイル一式を含む。
 
 ## 概要
 
-このプロジェクトは {{tool}} を使用した {{domain}} プロジェクトです。
-主な作業内容は **{{workType}}** で、目標は **{{goal}}** です。
+{{projectName}} は {{domain}} を目的とするプロジェクトです。
+Claude Code（claude.com/code）と組み合わせて開発・運用することを想定しています。
 
 ## セットアップ
 
 \`\`\`bash
-# リポジトリをクローン
-git clone <repository-url>
+# 取得（例。実際の URL に置き換える）
+git clone https://github.com/your-account/{{projectName}}.git
 cd {{projectName}}
 
-# 依存関係をインストール
-npm install  # または適切なパッケージマネージャを使用
-
-# 開発サーバーを起動
+# 依存関係のインストール・起動（実際のコマンドに置き換える）
+npm install
 npm run dev
 \`\`\`
 
-## Claude Code との連携
+## Claude Code 設定ファイル
 
-このプロジェクトは Claude Code の設定ファイルを含みます:
+このプロジェクトには以下の Claude Code 設定が含まれます:
 
-- \`CLAUDE.md\` - Claude Code の動作設定
-- \`.claude/skills/main/SKILL.md\` - 利用可能なスキル一覧
-- \`.claude/rules/security-guidelines.md\` - セキュリティガイドライン
+| ファイル | 役割 |
+|---------|------|
+| \`CLAUDE.md\` | Claude Code の動作ルール・プロジェクト設定 |
+| \`.claude/skills/main/SKILL.md\` | 利用可能なスキル一覧 |
+| \`.claude/rules/security-guidelines.md\` | セキュリティガイドライン |
 
 ## ライセンス
 
