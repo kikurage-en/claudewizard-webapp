@@ -168,7 +168,7 @@
     "subtitle": "Your config files have been generated",
     "description": "Download the ZIP and extract it to your project's root directory.",
     "files_title": "Generated Files",
-    "consent_label": "I agree to the Terms of Service and download",
+    "consent_label": "I agree to the Terms of Service",
     "download_label": "Download ZIP",
     "download_disabled": "Agree to the Terms of Service to download",
     "placement_guide": "View placement guide",

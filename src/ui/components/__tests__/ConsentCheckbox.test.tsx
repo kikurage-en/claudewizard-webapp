@@ -14,18 +14,18 @@ function renderConsent(lang: 'ja' | 'en' = 'ja', checked = false) {
 }
 
 describe('ConsentCheckbox', () => {
-  it('ja: 同意文言が正しい語順で表示される（利用規約 → に同意してダウンロードする）', () => {
+  it('ja: 同意文言が正しい語順で表示される（利用規約 → に同意する）', () => {
     renderConsent('ja')
     const label = document.querySelector('label')
     // 表示テキスト全体が consent_label と完全一致（語順崩れ・重複なし）
-    expect(label?.textContent).toBe('利用規約に同意してダウンロードする')
-    expect(label?.textContent).not.toContain('に同意してダウンロードする利用規約')
+    expect(label?.textContent).toBe('利用規約に同意する')
+    expect(label?.textContent).not.toContain('に同意する利用規約')
   })
 
   it('en: 同意文言が正しい語順で表示される（語中のリンクが正しい位置）', () => {
     renderConsent('en')
     const label = document.querySelector('label')
-    expect(label?.textContent).toBe('I agree to the Terms of Service and download')
+    expect(label?.textContent).toBe('I agree to the Terms of Service')
   })
 
   it('利用規約がリンクで、terms ページを別タブで指す', () => {

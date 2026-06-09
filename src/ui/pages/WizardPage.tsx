@@ -53,6 +53,13 @@ export function WizardPage({ lang, onComplete, onCancel }: Props) {
     trackEvent('question_complete', { question_id: question.id, index: state.currentIndex + 1 })
 
     if (state.currentIndex === total - 1) {
+      // Free は静的生成。同意なし自動DL（FR-4 違反）を避けるため、ここでは生成・DL せず完了画面へ。
+      // 生成・DL は CompletePage で利用規約に同意した後に行う。
+      if (state.plan === 'free') {
+        dispatch({ type: 'SET_DONE' })
+        onComplete()
+        return
+      }
       dispatch({ type: 'SET_GENERATING', value: true })
       setErrorCode(null)
       try {

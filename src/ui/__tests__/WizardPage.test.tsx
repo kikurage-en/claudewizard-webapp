@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { WizardPage } from '../pages/WizardPage'
 import { WizardProvider } from '../../wizard/WizardProvider'
 import { LanguageProvider } from '../../i18n/context'
+import { generate } from '../../generator/generate'
 
 vi.mock('../../generator/generate', () => ({
   generate: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'application/zip' })),
@@ -74,5 +75,23 @@ describe('WizardPage', () => {
     renderWizardPage()
     const nextBtn = screen.getByRole('button', { name: /次へ|next/i })
     expect(nextBtn).toBeDisabled()
+  })
+
+  it('Free: 全質問完了で次へを押しても generate(自動DL)せず onComplete が呼ばれる（同意前DL防止・FR-4）', () => {
+    const onComplete = vi.fn()
+    renderWizardPage(onComplete)
+    const next = () => screen.getByRole('button', { name: /次へ|next/i })
+    // Q1: 分野（choice）を選択 → 次へ
+    fireEvent.click(document.querySelectorAll('button[aria-pressed]')[0])
+    fireEvent.click(next())
+    // Q2: プロジェクト名（text）を入力 → 次へ
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'my-proj' } })
+    fireEvent.click(next())
+    // Q3: 言語（choice・最後）を選択 → 次へ
+    fireEvent.click(document.querySelectorAll('button[aria-pressed]')[0])
+    fireEvent.click(next())
+    // Free は WizardPage で生成・DL せず、CompletePage で同意後に行う
+    expect(vi.mocked(generate)).not.toHaveBeenCalled()
+    expect(onComplete).toHaveBeenCalledTimes(1)
   })
 })

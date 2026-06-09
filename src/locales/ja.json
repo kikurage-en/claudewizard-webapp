@@ -168,7 +168,7 @@
     "subtitle": "設定ファイルが生成されました",
     "description": "ZIP をダウンロードして、プロジェクトのルートディレクトリに展開してください。",
     "files_title": "生成されたファイル",
-    "consent_label": "利用規約に同意してダウンロードする",
+    "consent_label": "利用規約に同意する",
     "download_label": "ZIP をダウンロード",
     "download_disabled": "利用規約に同意するとダウンロードできます",
     "placement_guide": "使い方ガイドを見る",
