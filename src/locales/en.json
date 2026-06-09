@@ -191,7 +191,8 @@
     },
     "generation": {
       "failed": "Failed to generate files. Please try again.",
-      "zip_failed": "Failed to create ZIP. Please reload the page and try again."
+      "zip_failed": "Failed to create ZIP. Please reload the page and try again.",
+      "unavailable": "This plan is not available yet. Please check back later."
     }
   },
   "legal": {

@@ -1,25 +1,15 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useWizard } from '../../wizard/WizardProvider'
 import { getQuestions } from '../../wizard/questions'
 import { useTranslation } from '../../i18n/useTranslation'
 import { ProgressBar } from '../components/ProgressBar'
 import { ChoiceCard } from '../components/ChoiceCard'
 import { TextInput } from '../components/TextInput'
-import { ErrorBanner, type ErrorCode } from '../components/ErrorBanner'
 import type { Lang } from '../../i18n/types'
 import type { ChoiceQuestion, TextQuestion } from '../../wizard/types'
-import { generate, MissingApiKeyError } from '../../generator/generate'
-import { AnthropicClientError } from '../../security/anthropicClient'
-import { downloadBlob } from '../../generator/zipBuilder'
 import { trackEvent } from '../../analytics/events'
 
 const SHORTCUTS = ['A', 'B', 'C', 'D', 'E', 'F']
-
-function mapErrorToCode(err: unknown): ErrorCode {
-  if (err instanceof AnthropicClientError) return err.code as ErrorCode
-  if (err instanceof MissingApiKeyError) return 'auth'
-  return 'unknown'
-}
 
 type Props = {
   lang: Lang
@@ -27,10 +17,9 @@ type Props = {
   onCancel: () => void
 }
 
-export function WizardPage({ lang, onComplete, onCancel }: Props) {
+export function WizardPage({ onComplete, onCancel }: Props) {
   const { t } = useTranslation()
   const { state, dispatch } = useWizard()
-  const [errorCode, setErrorCode] = useState<ErrorCode | null>(null)
   const questions = getQuestions(state.plan)
   const total = questions.length
   const question = questions[state.currentIndex]
@@ -47,37 +36,19 @@ export function WizardPage({ lang, onComplete, onCancel }: Props) {
     return true
   }
 
-  const handleNext = useCallback(async () => {
+  const handleNext = useCallback(() => {
     if (!canProceed()) return
 
     trackEvent('question_complete', { question_id: question.id, index: state.currentIndex + 1 })
 
     if (state.currentIndex === total - 1) {
-      // Free は静的生成。同意なし自動DL（FR-4 違反）を避けるため、ここでは生成・DL せず完了画面へ。
-      // 生成・DL は CompletePage で利用規約に同意した後に行う。
-      if (state.plan === 'free') {
-        dispatch({ type: 'SET_DONE' })
-        onComplete()
-        return
-      }
-      dispatch({ type: 'SET_GENERATING', value: true })
-      setErrorCode(null)
-      try {
-        const blob = await generate(state.plan, lang, state.answers)
-        downloadBlob(blob, t('result.zip_filename'))
-        trackEvent('zip_download', { plan: state.plan })
-        dispatch({ type: 'SET_DONE' })
-        onComplete()
-      } catch (err) {
-        dispatch({ type: 'SET_GENERATING', value: false })
-        const code = mapErrorToCode(err)
-        setErrorCode(code)
-        trackEvent('error_occurred', { error_type: code })
-      }
+      // 生成・DL は CompletePage で利用規約に同意した後に行う（同意なし自動DL を防ぐ・全プラン共通）。
+      dispatch({ type: 'SET_DONE' })
+      onComplete()
       return
     }
     dispatch({ type: 'NEXT' })
-  }, [canProceed, question.id, state, total, dispatch, lang, t, onComplete])
+  }, [canProceed, question.id, state, total, dispatch, onComplete])
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -97,15 +68,6 @@ export function WizardPage({ lang, onComplete, onCancel }: Props) {
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [handleNext, question, dispatch])
-
-  if (state.isGenerating) {
-    return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center gap-6">
-        <span className="text-6xl animate-bounce motion-reduce:animate-none">🐬</span>
-        <p className="font-display font-bold text-xl text-ink">{t('wizard.generating')}</p>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-cream flex flex-col md:flex-row">
@@ -131,23 +93,7 @@ export function WizardPage({ lang, onComplete, onCancel }: Props) {
       </aside>
 
       <main className="flex-1 p-8 flex flex-col gap-6">
-        {errorCode && (
-          <ErrorBanner
-            code={errorCode}
-            onRetry={() => {
-              setErrorCode(null)
-              handleNext()
-            }}
-            onDismiss={() => setErrorCode(null)}
-          />
-        )}
-        <div
-          className={[
-            'flex-1 flex flex-col gap-3',
-            errorCode ? 'pointer-events-none opacity-50' : '',
-          ].join(' ')}
-          aria-disabled={errorCode ? true : undefined}
-        >
+        <div className="flex-1 flex flex-col gap-3">
           {question.type === 'choice' && (
             <>
               {(question as ChoiceQuestion).options.map((opt, i) => (
@@ -195,10 +141,10 @@ export function WizardPage({ lang, onComplete, onCancel }: Props) {
           <button
             type="button"
             onClick={handleNext}
-            disabled={!canProceed() || !!errorCode}
+            disabled={!canProceed()}
             className={[
               'btn-primary px-6 py-2 text-sm',
-              !canProceed() || errorCode ? 'opacity-50 cursor-not-allowed' : '',
+              !canProceed() ? 'opacity-50 cursor-not-allowed' : '',
             ].join(' ')}
           >
             {t('wizard.next')}

@@ -50,14 +50,19 @@ test.describe('Light プラン完走フロー（実 API キー使用）', () => 
     await page.locator('button[aria-pressed]').first().click()
     await page.getByRole('button', { name: /次へ/i }).click()
 
-    // 8. Q6: 備考・要望（任意。空のまま進める）
-    const downloadPromise = page.waitForEvent('download', { timeout: 100_000 })
+    // 8. Q6: 備考・要望（任意。空のまま進める）→ 完了画面へ（統一フロー: ここでは生成しない）
     await page.getByRole('button', { name: /次へ/i }).click()
+    await expect(page).toHaveURL(/#\/ja\/complete/, { timeout: 10_000 })
 
-    // 9. 生成中ローディング（イルカアニメーション）
+    // 9. 利用規約に同意 → ダウンロードボタンで生成（API）+ DL（同意なし自動DLを防ぐ統一フロー）
+    await page.getByRole('checkbox').click()
+    const downloadPromise = page.waitForEvent('download', { timeout: 100_000 })
+    await page.getByRole('button', { name: /ダウンロード/i }).click()
+
+    // 10. 生成中ローディング（DownloadButton の loading 表示）
     await expect(page.getByText(/生成中/)).toBeVisible({ timeout: 5_000 })
 
-    // 10. ZIP ダウンロード
+    // 11. ZIP ダウンロード
     const download = await downloadPromise
     const path = await download.path()
     expect(path).toBeTruthy()

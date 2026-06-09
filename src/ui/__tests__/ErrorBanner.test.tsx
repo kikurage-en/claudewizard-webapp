@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ErrorBanner, type ErrorCode } from '../components/ErrorBanner'
+import { ErrorBanner, mapErrorToCode, type ErrorCode } from '../components/ErrorBanner'
 import { LanguageProvider } from '../../i18n/context'
+import { AnthropicClientError } from '../../security/anthropicClient'
+import { MissingApiKeyError, NotImplementedError } from '../../generator/generate'
 
 function renderBanner(code: ErrorCode, onRetry?: () => void, onDismiss?: () => void) {
   return render(
@@ -68,5 +70,21 @@ describe('ErrorBanner', () => {
   it('role="alert" でアクセシブルに通知される', () => {
     renderBanner('auth')
     expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+
+  it('unavailable は fatal 分類で再試行ボタンが出ない（Plus 未配線）', () => {
+    renderBanner('unavailable', vi.fn())
+    const banner = screen.getByTestId('error-banner')
+    expect(banner).toHaveAttribute('data-category', 'fatal')
+    expect(screen.queryByRole('button', { name: /再試行/ })).not.toBeInTheDocument()
+  })
+})
+
+describe('mapErrorToCode', () => {
+  it('生成時の各例外を ErrorCode に分類する', () => {
+    expect(mapErrorToCode(new AnthropicClientError('x', 'rate_limit'))).toBe('rate_limit')
+    expect(mapErrorToCode(new MissingApiKeyError())).toBe('auth')
+    expect(mapErrorToCode(new NotImplementedError('plus'))).toBe('unavailable')
+    expect(mapErrorToCode(new Error('unexpected'))).toBe('unknown')
   })
 })

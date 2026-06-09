@@ -1,6 +1,8 @@
 import { useTranslation } from '../../i18n/useTranslation'
 import type { DeepKeys } from '../../i18n/types'
 import jaLocale from '../../locales/ja.json'
+import { AnthropicClientError } from '../../security/anthropicClient'
+import { MissingApiKeyError, NotImplementedError } from '../../generator/generate'
 
 export type ErrorCode =
   | 'auth'
@@ -9,6 +11,7 @@ export type ErrorCode =
   | 'timeout'
   | 'cors'
   | 'content_safety'
+  | 'unavailable'
   | 'unknown'
 
 type ErrorCategory = 'auto_recovery' | 'user_action' | 'fatal'
@@ -22,6 +25,8 @@ const CATEGORY_MAP: Record<ErrorCode, ErrorCategory> = {
   content_safety: 'user_action',
   unknown: 'user_action',
   cors: 'fatal',
+  // Plus 未配線（NotImplementedError）。再試行しても必ず失敗するため fatal（retry ボタンを出さない）。
+  unavailable: 'fatal',
 }
 
 type LocaleKey = DeepKeys<typeof jaLocale>
@@ -33,7 +38,16 @@ const MESSAGE_KEY: Record<ErrorCode, LocaleKey> = {
   timeout: 'errors.api.timeout',
   cors: 'errors.api.cors',
   content_safety: 'errors.api.content_safety',
+  unavailable: 'errors.generation.unavailable',
   unknown: 'errors.generation.failed',
+}
+
+// 生成時の例外を ErrorCode に分類する（WizardPage / CompletePage 共通。ErrorCode と密接なため本ファイルに集約）。
+export function mapErrorToCode(err: unknown): ErrorCode {
+  if (err instanceof AnthropicClientError) return err.code as ErrorCode
+  if (err instanceof MissingApiKeyError) return 'auth'
+  if (err instanceof NotImplementedError) return 'unavailable'
+  return 'unknown'
 }
 
 type Props = {
