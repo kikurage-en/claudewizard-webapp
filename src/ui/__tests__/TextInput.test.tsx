@@ -22,6 +22,13 @@ describe('TextInput', () => {
     expect(onEnter).toHaveBeenCalledTimes(1)
   })
 
+  it('IME 変換確定の Enter（isComposing）では onEnter が呼ばれない（日本語入力対応）', () => {
+    const onEnter = vi.fn()
+    render(<TextInput id="note" label="備考" value="てすと" onChange={vi.fn()} onEnter={onEnter} />)
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter', isComposing: true })
+    expect(onEnter).not.toHaveBeenCalled()
+  })
+
   it('onEnter が未指定の場合 Enter キーでエラーにならない', () => {
     render(<TextInput id="name" label="名前" value="test" onChange={vi.fn()} />)
     expect(() => {

@@ -53,6 +53,8 @@ export function WizardPage({ onComplete, onCancel }: Props) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return
+      // IME 変換確定の Enter（日本語入力など）は「次へ」扱いにしない
+      if (e.isComposing) return
       if (e.key === 'Enter') {
         handleNext()
         return

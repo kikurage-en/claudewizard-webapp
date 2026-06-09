@@ -94,4 +94,15 @@ describe('WizardPage', () => {
     expect(vi.mocked(generate)).not.toHaveBeenCalled()
     expect(onComplete).toHaveBeenCalledTimes(1)
   })
+
+  it('IME 変換確定の Enter（isComposing）では次へ進まない（日本語入力対応）', () => {
+    renderWizardPage()
+    // Q1 choice 選択 → 次へ → Q2(text) へ
+    fireEvent.click(document.querySelectorAll('button[aria-pressed]')[0])
+    fireEvent.click(screen.getByRole('button', { name: /次へ|next/i }))
+    expect(screen.getByText(/質問 2 \/ 3/)).toBeInTheDocument()
+    // IME 変換確定の Enter は「次へ」扱いにしない → Q2 のまま遷移しない
+    fireEvent.keyDown(window, { key: 'Enter', isComposing: true })
+    expect(screen.getByText(/質問 2 \/ 3/)).toBeInTheDocument()
+  })
 })

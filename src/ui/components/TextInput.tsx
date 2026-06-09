@@ -10,7 +10,8 @@ type Props = {
 
 export function TextInput({ id, label, value, placeholder, onChange, onEnter, isValid }: Props) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && onEnter) {
+    // IME 変換確定の Enter（日本語入力など）は「次へ」送信扱いにしない
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing && onEnter) {
       e.preventDefault()
       onEnter()
     }
