@@ -13,6 +13,7 @@ export const FREE_MANIFEST: ZipEntry[] = [
 export const LIGHT_MANIFEST: ZipEntry[] = [
   ...FREE_MANIFEST,
   { zipPath: '.claude/rules/development-workflow.md', templateKey: 'development_workflow_md' },
+  { zipPath: '.claude/rules/core-principles.md', templateKey: 'core_principles_md' },
 ]
 
 // Plus（9 ファイル）。Free/Light と異なり全コンテンツが Claude API 由来（Step3/4/5）または

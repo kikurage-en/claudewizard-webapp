@@ -10,22 +10,26 @@ type Lang = 'ja' | 'en'
 
 async function loadStaticTemplates(lang: Lang) {
   if (lang === 'ja') {
-    const [securityMd, workflowMd] = await Promise.all([
+    const [securityMd, workflowMd, corePrinciplesMd] = await Promise.all([
       import('../templates/ja/security_guidelines_md'),
       import('../templates/ja/development_workflow_md'),
+      import('../templates/ja/core_principles_md'),
     ])
     return {
       security_guidelines_md: securityMd.template,
       development_workflow_md: workflowMd.template,
+      core_principles_md: corePrinciplesMd.template,
     }
   } else {
-    const [securityMd, workflowMd] = await Promise.all([
+    const [securityMd, workflowMd, corePrinciplesMd] = await Promise.all([
       import('../templates/en/security_guidelines_md'),
       import('../templates/en/development_workflow_md'),
+      import('../templates/en/core_principles_md'),
     ])
     return {
       security_guidelines_md: securityMd.template,
       development_workflow_md: workflowMd.template,
+      core_principles_md: corePrinciplesMd.template,
     }
   }
 }
@@ -96,6 +100,7 @@ export async function generateLight(
     skill_md: apiFiles.skill_md,
     security_guidelines_md: render(staticTemplates.security_guidelines_md, vars),
     development_workflow_md: render(staticTemplates.development_workflow_md, vars),
+    core_principles_md: render(staticTemplates.core_principles_md, vars),
   }
 
   const files = LIGHT_MANIFEST.map((entry) => {

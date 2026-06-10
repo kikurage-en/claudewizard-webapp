@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## v0.2.2 (2026-06-10)
+
+### Light プラン増強（品質接地 + core-principles 追加 5→6）
+
+#### 追加
+
+- `src/templates/{ja,en}/core_principles_md.ts`: Light に静的テンプレ `core-principles.md`（Evidence First / Boundary Check / Failure Reflection の3原則）を追加。CLI `core-principles.md` から翻案し self-contained 化。Light の出力ファイルが 5 → **6** に。
+- `src/templates/manifest.ts`: `LIGHT_MANIFEST` に core-principles を追加（FREE_MANIFEST spread の末尾＝Free/Plus 非波及）。
+- `src/generator/lightGenerator.ts`: `loadStaticTemplates` / `allTemplates` に core_principles を配線。
+- `scripts/verify-prompts-grounded.sh` + `.github/workflows/e2e.yml`: **.enc 反映漏れ防止ゲート**（復号した light prompt に grounding マーカーの存在を grep 検証。ローカル必須完了条件 + CI ゲート）。
+
+#### 変更
+
+- `src/prompts/light_{ja,en}.ts`（平文）: 生成 prompt を dotfiles/CLI 慣習へ接地 — CLAUDE.md を **最大150行 → 100行以下**（自リポジトリ Truth Source `verification-guidelines.md` に整合）、MUST/MUST NOT 形式、出荷3 rules への @参照チェーン、SKILL.md の YAML frontmatter 必須化、Q3-Q5（作業内容/ツール/目標）の反映を具体マッピング化。**※ `.enc` 再暗号化（USER-GATED）まで本番未反映。**
+
+#### テスト・検証
+
+- `templates/__tests__/manifest.test.ts`（新規）: FREE=4 / LIGHT=6 / PLUS=9・LIGHT[0..3]===FREE・Plus 非波及を deterministic に assert（adversarial review finding 3）。
+- `generator/__tests__/lightGenerator.test.ts`: 生成 Blob を展開し 6 entries + core-principles を検証。
+- `e2e/light-flow.spec.ts`: ファイル数 6 + **出力構造 assert**（CLAUDE.md ≤100行・@参照3本・SKILL frontmatter、adversarial review finding 2）。
+- drift 同時更新: `CompletePage.test.tsx`（light:6）/ `locales/{ja,en}.json`（files_count 6）/ spec（requirements / acceptance）/ 元要件定義書 §3.3・§19.1。
+
 ## v0.2.1 (2026-06-04)
 
 ### Phase 2 クローズ + GitHub Pages 配信修正 + 公開リポジトリ同期

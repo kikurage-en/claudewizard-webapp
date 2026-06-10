@@ -9,6 +9,8 @@ import { template as enClaudeMd } from '../en/claude_md'
 import { template as enReadmeMd } from '../en/readme_md'
 import { template as enSkillMd } from '../en/skill_md'
 import { template as enSecurityMd } from '../en/security_guidelines_md'
+import { template as jaCorePrinciplesMd } from '../ja/core_principles_md'
+import { template as enCorePrinciplesMd } from '../en/core_principles_md'
 
 // Free 再設計: テンプレは projectName + domain + stack 由来変数（techStack/buildCommands/architecture）に依存。
 const baseJa = { projectName: 'test-project', domain: 'ソフトウェア開発' }
@@ -89,6 +91,25 @@ describe('English Free templates（dotfiles/CLI 接地・no instructions）', ()
     const r = render(enSecurityMd, varsEn)
     expect(r).toContain('test-project')
     expect(r).toContain('Security Guidelines')
+  })
+})
+
+describe('core-principles テンプレ（Light 追加・dotfiles/CLI 接地）', () => {
+  it('ja: 3原則マーカー含む・projectName 反映・記入指示なし', () => {
+    const r = render(jaCorePrinciplesMd, varsJa)
+    expect(r).toContain('test-project')
+    expect(r).toContain('Evidence First')
+    expect(r).toContain('Boundary Check')
+    expect(r).toContain('Failure Reflection')
+    for (const p of INSTRUCTION_JA) expect(r).not.toMatch(p)
+  })
+  it('en: 3原則マーカー含む・projectName 反映・記入指示なし', () => {
+    const r = render(enCorePrinciplesMd, varsEn)
+    expect(r).toContain('test-project')
+    expect(r).toContain('Evidence First')
+    expect(r).toContain('Boundary Check')
+    expect(r).toContain('Failure Reflection')
+    for (const p of INSTRUCTION_EN) expect(r).not.toMatch(p)
   })
 })
 

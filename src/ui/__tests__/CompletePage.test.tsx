@@ -113,7 +113,7 @@ describe('CompletePage（統一フロー: 同意 → 生成 → DL）', () => {
       counts[plan] = container.querySelectorAll('ul code').length
       unmount()
     }
-    expect(counts).toEqual({ free: 4, light: 5, plus: 9 })
+    expect(counts).toEqual({ free: 4, light: 6, plus: 9 })
   })
 
   it('もう一度試すボタンで onTryAgain が呼ばれる', () => {

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import JSZip from 'jszip'
 
 // vi.hoisted で宣言することで vi.mock factory 内で参照可能
 const { mockCallClaude } = vi.hoisted(() => ({ mockCallClaude: vi.fn() }))
@@ -89,6 +90,30 @@ describe('generateLight', () => {
         q5: 'speed',
       })
     ).rejects.toThrow()
+  })
+
+  it('生成 Blob は 6 entries（core-principles 含む・5→6）', async () => {
+    mockCallClaude.mockResolvedValue(VALID_API_RESPONSE)
+
+    const blob = await generateLight('sk-ant-test', 'ja', {
+      q1: 'software',
+      q2: 'my-project',
+      q3: 'create',
+      q4: 'programming',
+      q5: 'speed',
+    })
+
+    const zip = await JSZip.loadAsync(await blob.arrayBuffer())
+    const entries = Object.keys(zip.files).filter((p) => !zip.files[p].dir)
+    expect(entries.length).toBe(6)
+    expect(entries).toContain('.claude/rules/core-principles.md')
+    expect(entries).toContain('.claude/rules/development-workflow.md')
+    expect(entries).toContain('CLAUDE.md')
+
+    // core-principles は静的テンプレ（render 済み・projectName 反映・3原則を含む）
+    const core = await zip.file('.claude/rules/core-principles.md')!.async('string')
+    expect(core).toContain('my-project')
+    expect(core).toContain('Evidence First')
   })
 
   it('q6（備考・要望）がある場合もエラーなく動作する', async () => {
