@@ -15,14 +15,9 @@ export const template = `# {{projectName}}
 
 {{buildCommands}}
 
-## Code Style
+## {{workRulesHeading}}
 
-- MUST: 問題を解決する最小限の変更にとどめる（投機的な実装をしない）
-- MUST: 触る必要のある箇所だけ変更する（無関係な整形・改善をしない）
-- MUST: コードを書く前に、関連する既存コード・呼び出し元・共有処理を読む
-- MUST: テストは「なぜその挙動が重要か」を検証する（挙動の丸写しにしない）
-- MUST: 既存コードベースの規約に合わせる
-- MUST NOT: スキップした作業を「完了」と報告しない
+{{workRules}}
 
 ## Architecture
 
@@ -39,9 +34,10 @@ export const template = `# {{projectName}}
 
 ## Important Rules
 
-- 構築 → テスト → デプロイ → 運用 の順に進める
+- {{lifecycleRule}}
 - 迷ったときは推測で埋めず、確認する
 - ドキュメントを最新の状態に保つ
+- 判断の基本原則（Evidence First 等）は @.claude/rules/core-principles.md を参照
 
 ## Skills
 

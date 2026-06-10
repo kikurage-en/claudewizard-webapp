@@ -4,8 +4,12 @@ export const template = `# {{projectName}}
 
 ## 概要
 
-{{projectName}} は {{domain}} を目的とするプロジェクトです。
-Claude Code（claude.com/code）と組み合わせて開発・運用することを想定しています。
+{{domain}} に関する作業を Claude Code と進めるプロジェクト。
+CLAUDE.md と .claude/ 配下のルール・スキルが Claude の動作基準になります。
+
+## 技術スタック
+
+{{techStack}}
 
 ## セットアップ
 
@@ -22,6 +26,7 @@ Claude Code（claude.com/code）と組み合わせて開発・運用すること
 | \`CLAUDE.md\` | Claude Code の動作ルール・プロジェクト設定 |
 | \`.claude/skills/main/SKILL.md\` | 利用可能なスキル一覧 |
 | \`.claude/rules/security-guidelines.md\` | セキュリティガイドライン |
+| \`.claude/rules/core-principles.md\` | 判断の基本原則（Evidence First 等） |
 
 ## ライセンス
 

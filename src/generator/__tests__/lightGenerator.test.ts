@@ -92,7 +92,7 @@ describe('generateLight', () => {
     ).rejects.toThrow()
   })
 
-  it('生成 Blob は 6 entries（core-principles 含む・5→6）', async () => {
+  it('生成 Blob は 8 entries（CLI 必須 5 rules 完備・6→8）', async () => {
     mockCallClaude.mockResolvedValue(VALID_API_RESPONSE)
 
     const blob = await generateLight('sk-ant-test', 'ja', {
@@ -105,15 +105,25 @@ describe('generateLight', () => {
 
     const zip = await JSZip.loadAsync(await blob.arrayBuffer())
     const entries = Object.keys(zip.files).filter((p) => !zip.files[p].dir)
-    expect(entries.length).toBe(6)
+    expect(entries.length).toBe(8)
     expect(entries).toContain('.claude/rules/core-principles.md')
     expect(entries).toContain('.claude/rules/development-workflow.md')
+    expect(entries).toContain('.claude/rules/prevent-narrow-framing.md')
+    expect(entries).toContain('.claude/rules/failure-routing.md')
     expect(entries).toContain('CLAUDE.md')
 
     // core-principles は静的テンプレ（render 済み・projectName 反映・3原則を含む）
     const core = await zip.file('.claude/rules/core-principles.md')!.async('string')
     expect(core).toContain('my-project')
     expect(core).toContain('Evidence First')
+
+    // 新規 2 rules も render 済み（projectName 反映・未解決変数なし）
+    const narrowFraming = await zip.file('.claude/rules/prevent-narrow-framing.md')!.async('string')
+    expect(narrowFraming).toContain('my-project')
+    expect(narrowFraming).not.toMatch(/\{\{\w+\}\}/)
+    const failureRouting = await zip.file('.claude/rules/failure-routing.md')!.async('string')
+    expect(failureRouting).toContain('my-project')
+    expect(failureRouting).not.toMatch(/\{\{\w+\}\}/)
   })
 
   it('q6（備考・要望）がある場合もエラーなく動作する', async () => {

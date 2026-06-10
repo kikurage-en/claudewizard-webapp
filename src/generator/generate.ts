@@ -1,6 +1,7 @@
 import type { Plan } from '../wizard/types'
 import { parseAnswers } from './parseAnswers'
 import { buildStackVars } from './stackProfiles'
+import { buildDomainVars, isCodeFree } from './domainProfiles'
 import { render } from './render'
 import { buildZip } from './zipBuilder'
 import { getManifest } from '../templates/manifest'
@@ -11,30 +12,34 @@ type Templates = Record<string, string>
 
 async function loadTemplates(lang: 'ja' | 'en'): Promise<Templates> {
   if (lang === 'ja') {
-    const [claudeMd, readmeMd, skillMd, securityMd] = await Promise.all([
+    const [claudeMd, readmeMd, skillMd, securityMd, corePrinciplesMd] = await Promise.all([
       import('../templates/ja/claude_md'),
       import('../templates/ja/readme_md'),
       import('../templates/ja/skill_md'),
       import('../templates/ja/security_guidelines_md'),
+      import('../templates/ja/core_principles_md'),
     ])
     return {
       claude_md: claudeMd.template,
       readme_md: readmeMd.template,
       skill_md: skillMd.template,
       security_guidelines_md: securityMd.template,
+      core_principles_md: corePrinciplesMd.template,
     }
   } else {
-    const [claudeMd, readmeMd, skillMd, securityMd] = await Promise.all([
+    const [claudeMd, readmeMd, skillMd, securityMd, corePrinciplesMd] = await Promise.all([
       import('../templates/en/claude_md'),
       import('../templates/en/readme_md'),
       import('../templates/en/skill_md'),
       import('../templates/en/security_guidelines_md'),
+      import('../templates/en/core_principles_md'),
     ])
     return {
       claude_md: claudeMd.template,
       readme_md: readmeMd.template,
       skill_md: skillMd.template,
       security_guidelines_md: securityMd.template,
+      core_principles_md: corePrinciplesMd.template,
     }
   }
 }
@@ -71,7 +76,12 @@ export async function generate(
   // Free 経路のみ到達（light は早期 return / plus は throw）。
   // Tech Stack 質問（stack）の回答から Tech Stack / Build & Test / Architecture を実値化する。
   // buildStackVars は Free 専用＝Light/Plus は parseAnswers のみで非到達（per-tier 非波及）。
-  const vars = { ...parseAnswers(answers, lang), ...buildStackVars(answers['stack'] ?? 'other-code', lang) }
+  // domain 適合（code/non-code 2 分岐）は Free では stack 軸を優先する（domainProfiles.ts）。
+  const vars = {
+    ...parseAnswers(answers, lang),
+    ...buildStackVars(answers['stack'] ?? 'other-code', lang),
+    ...buildDomainVars(isCodeFree(answers['stack']), lang),
+  }
   const templates = await loadTemplates(lang)
   const manifest = getManifest(plan)
 

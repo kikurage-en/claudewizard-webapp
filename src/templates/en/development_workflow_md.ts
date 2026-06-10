@@ -13,13 +13,13 @@ Development workflow guidelines for the {{projectName}} project.
 ### 2. During Implementation
 
 - Commit in small units
-- Write tests alongside implementation (TDD recommended)
+- {{implementWhileRule}}
 - Verify existing behavior before making changes
 
 ### 3. Before Completion
 
-- Ensure all tests pass
-- Go through the code review checklist
+- {{completionCheckRule}}
+- {{reviewChecklistRule}}
 - Update documentation
 
 ## Commit Convention
@@ -37,7 +37,7 @@ Example: \`feat: add user authentication\`
 
 ## Review Criteria
 
-- Is the intent and reasoning understandable from the code?
+- {{reviewCriteriaFirst}}
 - Are edge cases considered?
 - Is there any performance impact?
 - Are there any security concerns?

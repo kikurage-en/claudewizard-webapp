@@ -26,7 +26,7 @@ description: |
 現状を分析し、優先度付きで改善案を提示する。
 
 ### /review — レビュー
-変更差分を確認し、品質・セキュリティ観点でコメントする。
+{{reviewDescription}}
 
 ## 実行フロー
 
@@ -40,6 +40,7 @@ description: |
 |---------|------|
 | \`CLAUDE.md\` | 動作ルール・プロジェクト設定 |
 | \`.claude/rules/security-guidelines.md\` | セキュリティガイドライン |
+| \`.claude/rules/core-principles.md\` | 判断の基本原則（Evidence First 等） |
 `
 
 export default template

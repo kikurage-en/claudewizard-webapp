@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## v0.4.0 (2026-06-10)
+
+### 生成物の「ベストプラクティス」接地強化（domain 適合 + CLI 必須 rules 完備）
+
+「ベストプラクティスに沿った完成済みの一式」の訴求と生成物実態のギャップ（非コード分野へのコード専用指示の混入・CLI 必須 rules の欠落・品質の機械検証なし）を解消。
+
+#### 追加
+
+- `src/generator/domainProfiles.ts`: domain 適合（code/non-code 2 分岐）。Code Style ⇔ 作業ルール、構築→テスト→デプロイ ⇔ 確認→作成→見直し、npm audit/SQLi/XSS ⇔ 情報の取り扱い・利用ツール権限、等のセクション単位切替（code 系は現行文言を不変維持）。判定は Free=stack 軸優先 / Light=q1 分野・q4 ツールの信号
+- Free 4→5 ファイル: `core-principles.md`（Evidence First / Boundary Check / Failure Reflection）を追加。CLAUDE.md/SKILL/README の @参照・ファイル表にも反映
+- Light 6→8 ファイル: `prevent-narrow-framing.md` + `failure-routing.md` を新規テンプレ（ja/en、dotfiles 3 節形式接地）で追加 — CLI 版「全プロジェクト必須 5 rules」を Light で完備
+- `src/templates/__tests__/domain-quality.test.ts`: 7 domain × 6 stack/tool 全組合せ（ja/en）で 完成形（未解決変数・TODO なし）・CLAUDE.md ≤100 行・@参照整合（参照先が ZIP に同梱）・code/non-code 文言適合を deterministic 検証（計 176 ケース追加、全体 463 件）
+
+#### 修正
+
+- README テンプレの同語反復（「X は X を目的とする〜」）を解消し、技術スタック節＋core-principles 行を追加
+- 訴求文言: Plus の「150-200 指示の予算」（出典 humanlayer ブログ・公式用語でない）を公式表現（CLAUDE.md 簡潔維持の公式推奨）準拠に補正。Free は根拠を具体化（MUST/MUST NOT・@参照・記入指示なし）、Light は「備考・要望の自由記述を含む 6 回答を API 生成が柔軟に反映」を明文化
+- Light prompt（平文）: CLAUDE.md の @参照チェーンを 5 rules に拡張（**`.enc` 再暗号化は未実施・USER-GATED**）
+
+#### spec 改訂
+
+- requirements.md（FR-1 表 Free 5 / Light 8・出力ファイル仕様）/ acceptance.md（Phase 1=5・Phase 2=8）/ business-domain.md（150-200 表現の出典補正）/ 元要件定義書 §3.3・§19.1
+
 ## v0.3.0 (2026-06-10)
 
 ### フロントエンド UI ブラッシュアップ（デザイン確定版寄せ + 品質課題解消）

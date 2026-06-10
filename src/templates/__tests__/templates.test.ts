@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '../../generator/render'
 import { buildStackVars } from '../../generator/stackProfiles'
+import { buildDomainVars, isCodeFree } from '../../generator/domainProfiles'
 import { template as jaClaudeMd } from '../ja/claude_md'
 import { template as jaReadmeMd } from '../ja/readme_md'
 import { template as jaSkillMd } from '../ja/skill_md'
@@ -12,11 +13,12 @@ import { template as enSecurityMd } from '../en/security_guidelines_md'
 import { template as jaCorePrinciplesMd } from '../ja/core_principles_md'
 import { template as enCorePrinciplesMd } from '../en/core_principles_md'
 
-// Free 再設計: テンプレは projectName + domain + stack 由来変数（techStack/buildCommands/architecture）に依存。
+// Free 再設計: テンプレは projectName + domain + stack 由来変数（techStack/buildCommands/architecture）
+// + domain 適合変数（code/non-code 2 分岐: domainProfiles.ts）に依存。
 const baseJa = { projectName: 'test-project', domain: 'ソフトウェア開発' }
 const baseEn = { projectName: 'test-project', domain: 'Software Development' }
-const varsJa = { ...baseJa, ...buildStackVars('ts', 'ja') }
-const varsEn = { ...baseEn, ...buildStackVars('ts', 'en') }
+const varsJa = { ...baseJa, ...buildStackVars('ts', 'ja'), ...buildDomainVars(true, 'ja') }
+const varsEn = { ...baseEn, ...buildStackVars('ts', 'en'), ...buildDomainVars(true, 'en') }
 
 // 記入指示・命令形パターン（実テンプレ由来）。完成テンプレで完全撤廃されていること（false PASS 撲滅）。
 // 負検算（設計時確認済み）: 変更前テンプレの全記入指示がこのパターンにマッチする。
@@ -54,7 +56,7 @@ describe('Japanese Free templates（dotfiles/CLI 接地・記入指示なし）'
     for (const p of INSTRUCTION_JA) expect(r).not.toMatch(p)
   })
 
-  it('security_guidelines_md renders（Free/Light 共有・本スライス非改変）', () => {
+  it('security_guidelines_md renders（Free/Light 共有・domain 変数適用）', () => {
     const r = render(jaSecurityMd, varsJa)
     expect(r).toContain('test-project')
     expect(r).toContain('セキュリティガイドライン')
@@ -124,12 +126,20 @@ describe('stack 選択ごとに Tech Stack が実値化される（CLAUDE.md・�
   ]
   for (const c of cases) {
     it(`ja: stack=${c.stack} で固有の実値が出る・記入指示なし`, () => {
-      const r = render(jaClaudeMd, { ...baseJa, ...buildStackVars(c.stack, 'ja') })
+      const r = render(jaClaudeMd, {
+        ...baseJa,
+        ...buildStackVars(c.stack, 'ja'),
+        ...buildDomainVars(isCodeFree(c.stack), 'ja'),
+      })
       expect(r).toMatch(c.ja)
       for (const p of INSTRUCTION_JA) expect(r).not.toMatch(p)
     })
     it(`en: stack=${c.stack} で固有の実値が出る・記入指示なし`, () => {
-      const r = render(enClaudeMd, { ...baseEn, ...buildStackVars(c.stack, 'en') })
+      const r = render(enClaudeMd, {
+        ...baseEn,
+        ...buildStackVars(c.stack, 'en'),
+        ...buildDomainVars(isCodeFree(c.stack), 'en'),
+      })
       expect(r).toMatch(c.en)
       for (const p of INSTRUCTION_EN) expect(r).not.toMatch(p)
     })

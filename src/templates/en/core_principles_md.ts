@@ -22,7 +22,7 @@ When changing numbers, settings, or thresholds, check combination boundaries rat
 
 Do not let anomaly detection end at a notification. Confirm that downstream processing stops, state is cleared, or it is reconciled. For deploys, verify the running artifact reflects the change, not just a successful build.
 
-- **Criterion**: point to the code location where "detect -> notify -> downstream" all hold
+- **Criterion**: {{failureReflectionCriteria}}
 - **Triggers**: when implementing error handling, alerts, deploys, or retries
 
 ## Operational Clauses (meta-rules for applying the three principles)

@@ -26,7 +26,7 @@ Review what was produced and check quality and consistency.
 Analyze the current state and present prioritized improvements.
 
 ### /review — Review
-Review the diff and comment from quality and security perspectives.
+{{reviewDescription}}
 
 ## Workflow
 
@@ -40,6 +40,7 @@ Review the diff and comment from quality and security perspectives.
 |------|------|
 | \`CLAUDE.md\` | Behavior rules and project settings |
 | \`.claude/rules/security-guidelines.md\` | Security guidelines |
+| \`.claude/rules/core-principles.md\` | Core decision principles (Evidence First, etc.) |
 `
 
 export default template

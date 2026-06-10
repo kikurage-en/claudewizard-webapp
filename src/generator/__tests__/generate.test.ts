@@ -32,7 +32,7 @@ describe('generate', () => {
     expect(blob.size).toBeGreaterThan(0)
   })
 
-  it('ZIP contains 4 files in correct paths', async () => {
+  it('ZIP contains 5 files in correct paths', async () => {
     const blob = await generate('free', 'ja', mockAnswers)
     const zip = await JSZip.loadAsync(blob)
     const allEntries = Object.keys(zip.files)
@@ -40,8 +40,9 @@ describe('generate', () => {
     expect(allEntries).toContain('README.md')
     expect(allEntries).toContain('.claude/skills/main/SKILL.md')
     expect(allEntries).toContain('.claude/rules/security-guidelines.md')
+    expect(allEntries).toContain('.claude/rules/core-principles.md')
     const fileEntries = Object.values(zip.files).filter((f) => !f.dir)
-    expect(fileEntries.length).toBe(4)
+    expect(fileEntries.length).toBe(5)
   })
 
   it('ZIP files contain project name in content', async () => {
@@ -61,14 +62,14 @@ describe('generate', () => {
 
   // --- Free 再設計（2問・静的完成テンプレ）の deterministic 検証 ---
 
-  it('Free: 旧5問state（余分な q3-q5/q6 を含む）でも 4 ファイル・projectName 反映・TODO なし', async () => {
+  it('Free: 旧5問state（余分な q3-q5/q6 を含む）でも 5 ファイル・projectName 反映・TODO なし', async () => {
     // 再設計前の 5-6 問フローの回答が残っていても新フロー（q1/q2 のみ使用）で正しく動く（migration/F3）
     const legacyAnswers = {
       q1: 'software', q2: 'awesome-api', q3: 'create', q4: 'programming', q5: 'quality', q6: 'note',
     }
     const blob = await generate('free', 'ja', legacyAnswers)
     const zip = await JSZip.loadAsync(blob)
-    expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(4)
+    expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(5)
     const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
     expect(claudeMd).toContain('awesome-api')
     // 記入指示・命令形が出力に残っていない（実文言ベース・false PASS 撲滅）
@@ -78,11 +79,11 @@ describe('generate', () => {
     expect(claudeMd).not.toContain('アウトプット品質の向上') // goal ラベル
   })
 
-  it('Free: q1/q2 のみでも 4 ファイル生成', async () => {
+  it('Free: q1/q2 のみでも 5 ファイル生成', async () => {
     const minimal = { q1: 'software', q2: 'minimal-proj' }
     const blob = await generate('free', 'ja', minimal)
     const zip = await JSZip.loadAsync(blob)
-    expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(4)
+    expect(Object.values(zip.files).filter((f) => !f.dir).length).toBe(5)
     const claudeMd = (await zip.file('CLAUDE.md')?.async('string')) ?? ''
     expect(claudeMd).toContain('minimal-proj')
   })

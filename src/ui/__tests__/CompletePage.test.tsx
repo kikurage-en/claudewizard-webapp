@@ -102,7 +102,7 @@ describe('CompletePage（統一フロー: 同意 → 生成 → DL）', () => {
     expect(screen.queryByRole('button', { name: '再試行' })).not.toBeInTheDocument()
   })
 
-  it('ファイル一覧が plan 別の数になる（free=4 / light=5 / plus=9）', () => {
+  it('ファイル一覧が plan 別の数になる（free=5 / light=8 / plus=9）', () => {
     const counts: Record<string, number> = {}
     for (const plan of ['free', 'light', 'plus'] as const) {
       const { container, unmount } = render(
@@ -113,7 +113,7 @@ describe('CompletePage（統一フロー: 同意 → 生成 → DL）', () => {
       counts[plan] = container.querySelectorAll('[data-testid="file-item"]').length
       unmount()
     }
-    expect(counts).toEqual({ free: 4, light: 6, plus: 9 })
+    expect(counts).toEqual({ free: 5, light: 8, plus: 9 })
   })
 
   it('トップへ戻るボタンで onTryAgain が呼ばれる（CTA は DL/トップ/シェアの3系統）', () => {

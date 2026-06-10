@@ -71,7 +71,7 @@ test.describe('Free プラン完走フロー', () => {
     await expect(downloadBtn).toBeDisabled()
   })
 
-  test('同意チェック後にZIPダウンロードが可能（4ファイル）', async ({ page }) => {
+  test('同意チェック後にZIPダウンロードが可能（5ファイル）', async ({ page }) => {
     await page.getByRole('button', { name: /フリー/ }).click()
     await expect(page).toHaveURL(/#\/ja\/wizard/)
 
@@ -112,8 +112,9 @@ test.describe('Free プラン完走フロー', () => {
     expect(zip.files['README.md']).toBeTruthy()
     expect(zip.files['.claude/skills/main/SKILL.md']).toBeTruthy()
     expect(zip.files['.claude/rules/security-guidelines.md']).toBeTruthy()
+    expect(zip.files['.claude/rules/core-principles.md']).toBeTruthy()
     const fileEntries = Object.values(zip.files).filter((f) => !f.dir)
-    expect(fileEntries.length).toBe(4)
+    expect(fileEntries.length).toBe(5)
 
     // 接地検証: 生成 CLAUDE.md に記入指示が残っておらず、stack（TypeScript）が実値化されている
     const claudeMd = await zip.files['CLAUDE.md'].async('string')

@@ -13,7 +13,7 @@ test.describe('Light プラン完走フロー（実 API キー使用）', () => 
     await page.goto('/#/ja/')
   })
 
-  test('Light を選んで ApiKey 画面に遷移し、Q1-Q6 を回答して 6 ファイル ZIP を取得', async ({ page }) => {
+  test('Light を選んで ApiKey 画面に遷移し、Q1-Q6 を回答して 8 ファイル ZIP を取得', async ({ page }) => {
     // 1. Light プランを選択
     const lightCard = page.getByRole('button', { name: /ライト/ })
     await expect(lightCard).toHaveAttribute('aria-disabled', 'false')
@@ -67,7 +67,7 @@ test.describe('Light プラン完走フロー（実 API キー使用）', () => 
     const path = await download.path()
     expect(path).toBeTruthy()
 
-    // 11. ZIP の中身を検証（6ファイル）
+    // 11. ZIP の中身を検証（8ファイル: CLI 必須 5 rules 完備）
     const fs = await import('node:fs/promises')
     const buffer = await fs.readFile(path!)
     const zip = await JSZip.loadAsync(buffer)
@@ -78,7 +78,9 @@ test.describe('Light プラン完走フロー（実 API キー使用）', () => 
     expect(entries).toContain('.claude/rules/security-guidelines.md')
     expect(entries).toContain('.claude/rules/development-workflow.md')
     expect(entries).toContain('.claude/rules/core-principles.md')
-    expect(entries.length).toBe(6)
+    expect(entries).toContain('.claude/rules/prevent-narrow-framing.md')
+    expect(entries).toContain('.claude/rules/failure-routing.md')
+    expect(entries.length).toBe(8)
 
     // 12. 生成内容にプロジェクト名が含まれている
     const claudeMd = await zip.file('CLAUDE.md')?.async('string')
@@ -90,6 +92,9 @@ test.describe('Light プラン完走フロー（実 API キー使用）', () => 
     expect(claudeMd).toContain('@.claude/rules/core-principles.md')
     expect(claudeMd).toContain('@.claude/rules/security-guidelines.md')
     expect(claudeMd).toContain('@.claude/rules/development-workflow.md')
+    // 5 rules 化した prompt（.enc 再暗号化後に有効）の @参照チェーン
+    expect(claudeMd).toContain('@.claude/rules/prevent-narrow-framing.md')
+    expect(claudeMd).toContain('@.claude/rules/failure-routing.md')
     //   生成 SKILL.md は YAML frontmatter（name / description）を含む
     const skillMd = await zip.file('.claude/skills/main/SKILL.md')?.async('string')
     expect(skillMd?.startsWith('---')).toBe(true)

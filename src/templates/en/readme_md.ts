@@ -4,8 +4,12 @@ A {{domain}} project. Includes a set of Claude Code configuration files.
 
 ## Overview
 
-{{projectName}} is a project for {{domain}}.
-It is intended to be developed and operated together with Claude Code (claude.com/code).
+A project for {{domain}} work with Claude Code.
+CLAUDE.md and the rules/skills under .claude/ define how Claude behaves here.
+
+## Tech Stack
+
+{{techStack}}
 
 ## Setup
 
@@ -22,6 +26,7 @@ This project includes the following Claude Code configuration:
 | \`CLAUDE.md\` | Claude Code behavior rules and project settings |
 | \`.claude/skills/main/SKILL.md\` | Available skills |
 | \`.claude/rules/security-guidelines.md\` | Security guidelines |
+| \`.claude/rules/core-principles.md\` | Core decision principles (Evidence First, etc.) |
 
 ## License
 

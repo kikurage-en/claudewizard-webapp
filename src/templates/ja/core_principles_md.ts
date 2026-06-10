@@ -22,7 +22,7 @@ export const template = `# 基本原則 (Evidence First / Boundary Check / Failu
 
 異常検知は通知で終わらせない。後続処理が止まるか、状態が消えるか、reconcile されるかを確認する。デプロイは build 成功ではなく動作中 artifact の反映確認まで行う。
 
-- **達成条件**: 「検知 → 通知 → 後続処理」の 3 段が成立しているコード位置を提示する
+- **達成条件**: {{failureReflectionCriteria}}
 - **発動**: エラーハンドリング / アラート / デプロイ / リトライ周りの実装時
 
 ## 運用補強条項（3 原則の適用メタルール）

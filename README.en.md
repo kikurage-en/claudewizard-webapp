@@ -100,9 +100,9 @@ See `.claude/rules/security-guidelines.md` for details.
 
 | Plan | Questions | Output files | API calls | Cost |
 |------|-----------|--------------|-----------|------|
-| Free | 4–5 | 4 | None (template fill) | $0 |
-| Light | 5–6 | 5 | 1–2 | API pay-as-you-go (~$0.01–0.05) |
-| Plus | 5–6 | 9–11 | 4 (multi-step) | API + license |
+| Free | 3 | 5 | None (template fill) | $0 |
+| Light | 6 | 8 | 1–2 | API pay-as-you-go (~$0.01–0.05) |
+| Plus | 6 | 9–11 | 4 (multi-step) | API + license |
 
 ## Release Phases
 

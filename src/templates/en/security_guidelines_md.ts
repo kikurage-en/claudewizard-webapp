@@ -8,14 +8,12 @@ Security guidelines for the {{projectName}} project.
 
 - Hardcode sensitive information (API keys, passwords, tokens, etc.) in code
 - Commit sensitive information to version control
-- Directly execute or evaluate unvalidated external input
-- Use vulnerable cryptographic algorithms
+{{securityMustNotExtra}}
 
 ### MUST
 
 - Manage sensitive information using environment variables or secret management tools
-- Validate and sanitize all external input
-- Regularly check dependencies for vulnerabilities (\`npm audit\`, etc.)
+{{securityMustExtra}}
 - Use HTTPS to encrypt communications
 
 ## Authentication & Authorization
@@ -25,17 +23,7 @@ Security guidelines for the {{projectName}} project.
 - Manage sessions appropriately
 - Recommend multi-factor authentication
 
-## Input Validation
-
-- Always validate user input
-- Prevent attacks like SQL injection, XSS, etc.
-- Restrict file uploads by type and size
-
-## Dependencies
-
-- Pin package versions (manage lockfile)
-- Do not use packages with known vulnerabilities
-- Minimize unnecessary dependencies
+{{securityDomainSections}}
 
 ## Dangerous Operations Require Pre-confirmation
 
