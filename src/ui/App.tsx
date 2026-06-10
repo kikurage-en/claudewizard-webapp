@@ -33,6 +33,15 @@ export function App() {
     }
   }, [route, lang])
 
+  // /complete は completedState（メモリ上の完了状態）が前提のルート。
+  // リロード・直リンクで状態がない場合はトップへ正規化し、URL/表示/page_view の不一致を残さない
+  // （表示自体は下のフォールバック分岐が遮断済み。空回答での生成経路はここで URL ごと閉じる）
+  useEffect(() => {
+    if (route.name === 'complete' && !completedState) {
+      navigate(`/${lang}`)
+    }
+  }, [route, completedState, lang])
+
   const handleLanguageChange = (newLang: Lang) => {
     trackLanguageSwitch(lang, newLang)
     const sub = route.name !== 'top' && route.name !== 'not-found' ? route.name : ''
