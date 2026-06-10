@@ -12,34 +12,28 @@ export function PlanCard({ plan, onSelect, disabled = false }: Props) {
 
   const isPlus = plan === 'plus'
   const isComingSoon = plan === 'plus'
-
-  const handleClick = () => {
-    if (!disabled && !isComingSoon) onSelect(plan)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.key === 'Enter' || e.key === ' ') && !disabled && !isComingSoon) {
-      e.preventDefault()
-      onSelect(plan)
-    }
-  }
+  const inactive = disabled || isComingSoon
 
   return (
-    <div
+    // カード全体をネイティブ button にしてキーボード標準挙動（Enter/Space）を得る。
+    // 内側の CTA はネスト button を避けるため装飾 span。
+    <button
+      type="button"
       className={[
-        'card relative flex flex-col p-6',
+        'relative flex flex-col p-6 rounded-[18px] text-left w-full border transition-colors duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2',
         isPlus ? 'bg-dark-card text-dark-card-surface border-ink' : 'bg-white border-line-faint',
-        isPlus ? 'shadow-[5px_5px_0_#D97757]' : '',
-        isComingSoon ? 'opacity-60' : 'cursor-pointer hover:border-line-strong',
+        isPlus ? 'shadow-offset-orange-lg' : '',
+        inactive ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-line-strong',
       ].join(' ')}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={isComingSoon ? -1 : 0}
-      role="button"
-      aria-disabled={isComingSoon || disabled}
+      onClick={() => {
+        if (!inactive) onSelect(plan)
+      }}
+      disabled={inactive}
+      aria-disabled={inactive}
     >
       {isPlus && (
-        <span className="absolute -top-3 right-4 bg-orange text-white text-[10px] font-mono font-bold tracking-widest uppercase px-2 py-1 rounded-full">
+        <span className="absolute -top-3 right-5 bg-orange text-white text-[10px] font-mono font-bold tracking-widest uppercase px-2 py-1 rounded-full">
           {t('plans.plus.recommended')}
         </span>
       )}
@@ -64,7 +58,7 @@ export function PlanCard({ plan, onSelect, disabled = false }: Props) {
       </p>
 
       <div className={`border-t pt-4 mb-4 ${isPlus ? 'border-dark-card-divider' : 'border-line-faint'}`}>
-        <p className="text-2xl font-mono font-bold">{t(`plans.${plan}.price`)}</p>
+        <p className="text-[28px] leading-tight font-mono font-black tracking-tight">{t(`plans.${plan}.price`)}</p>
         <p className={`text-[10px] font-mono uppercase tracking-wider ${isPlus ? 'text-ink-faint' : 'text-ink-muted'}`}>
           {t(`plans.${plan}.price_note`)}
         </p>
@@ -81,19 +75,20 @@ export function PlanCard({ plan, onSelect, disabled = false }: Props) {
       </div>
 
       {isComingSoon ? (
-        <div className="btn-secondary text-center text-sm py-2 opacity-60 cursor-not-allowed">
+        <span className="btn-secondary block text-center text-sm py-2 opacity-60 cursor-not-allowed">
           {t(`plans.${plan}.coming_soon`)}
-        </div>
+        </span>
       ) : (
-        <button
-          className={isPlus ? 'w-full bg-orange text-white font-bold py-2 rounded-lg hover:bg-orange-dark transition-colors' : 'btn-primary w-full py-2'}
-          onClick={(e) => { e.stopPropagation(); onSelect(plan) }}
-          tabIndex={-1}
-          aria-hidden="true"
+        <span
+          className={
+            isPlus
+              ? 'block text-center w-full bg-orange text-white font-bold py-2 rounded-btn hover:bg-orange-hover transition-colors'
+              : 'btn-primary block text-center w-full py-2'
+          }
         >
           {t(`plans.${plan}.cta`)}
-        </button>
+        </span>
       )}
-    </div>
+    </button>
   )
 }

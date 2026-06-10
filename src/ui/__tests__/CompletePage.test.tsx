@@ -110,16 +110,48 @@ describe('CompletePage（統一フロー: 同意 → 生成 → DL）', () => {
           <CompletePage lang="ja" plan={plan} answers={mockAnswers} onTryAgain={vi.fn()} />
         </LanguageProvider>
       )
-      counts[plan] = container.querySelectorAll('ul code').length
+      counts[plan] = container.querySelectorAll('[data-testid="file-item"]').length
       unmount()
     }
     expect(counts).toEqual({ free: 4, light: 6, plus: 9 })
   })
 
-  it('もう一度試すボタンで onTryAgain が呼ばれる', () => {
+  it('トップへ戻るボタンで onTryAgain が呼ばれる（CTA は DL/トップ/シェアの3系統）', () => {
     const onTryAgain = vi.fn()
     renderComplete('free', onTryAgain)
-    fireEvent.click(screen.getByRole('button', { name: /もう一度/i }))
+    fireEvent.click(screen.getByRole('button', { name: /トップへ戻る/ }))
     expect(onTryAgain).toHaveBeenCalledTimes(1)
+  })
+
+  it('DONE バッジと完了ドット（質問数ぶん）が表示される', () => {
+    renderComplete('free')
+    expect(screen.getByTestId('done-badge')).toBeInTheDocument()
+    // free は 3 問 → ドット 3 個
+    expect(screen.getAllByTestId('complete-dot')).toHaveLength(3)
+  })
+
+  it('コーナーマスコットがお祝いの吹き出しを表示する', () => {
+    renderComplete('free')
+    expect(screen.getByText('おつかれさまでした！🎉')).toBeInTheDocument()
+  })
+
+  it('Web Share API 非対応環境ではシェアボタンを表示しない', () => {
+    renderComplete('free')
+    expect(screen.queryByRole('button', { name: /シェア/ })).not.toBeInTheDocument()
+  })
+
+  it('エラーバナー表示中は下のフォームが無効化される（opacity + pointer-events）', async () => {
+    generateMock.mockReset()
+    generateMock.mockRejectedValue(new AnthropicClientError('invalid', 'auth'))
+    renderComplete('light')
+    fireEvent.click(screen.getByRole('checkbox'))
+    fireEvent.click(screen.getByRole('button', { name: /ダウンロード|download/i }))
+    await waitFor(() => expect(screen.getByTestId('error-banner')).toBeInTheDocument())
+    const form = screen.getByTestId('complete-form')
+    expect(form.className).toContain('pointer-events-none')
+    expect(form.className).toContain('opacity-50')
+    // バナーを閉じると再び操作可能
+    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
+    expect(screen.getByTestId('complete-form').className).not.toContain('pointer-events-none')
   })
 })

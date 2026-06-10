@@ -43,9 +43,15 @@ describe('TextInput', () => {
     expect(screen.getByPlaceholderText('例: my-project')).toBeInTheDocument()
   })
 
-  it('isValid=false のときエラースタイルが適用される', () => {
+  it('isValid=false のとき aria-invalid で無効状態が示される', () => {
     render(<TextInput id="name" label="名前" value="" onChange={vi.fn()} isValid={false} />)
     const input = screen.getByRole('textbox')
-    expect(input.className).toContain('border-red-400')
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('isValid 未指定のときは aria-invalid が付かない', () => {
+    render(<TextInput id="name" label="名前" value="" onChange={vi.fn()} />)
+    const input = screen.getByRole('textbox')
+    expect(input).not.toHaveAttribute('aria-invalid', 'true')
   })
 })

@@ -33,7 +33,7 @@ export function ConsentCheckbox({ checked, onChange, lang }: Props) {
         {idx >= 0 && (
           <a
             href={`#/${lang}/terms`}
-            className="text-orange underline hover:text-orange-dark"
+            className="text-orange underline hover:text-orange-hover"
             target="_blank"
             rel="noopener noreferrer"
             // リンク（利用規約）クリックで親 label のチェック切り替えを誘発させない（誤トグル防止）

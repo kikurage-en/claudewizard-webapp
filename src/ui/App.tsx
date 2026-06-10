@@ -60,6 +60,8 @@ export function App() {
 
   const handleTryAgain = () => {
     setCompletedState(null)
+    // トップへ戻る際にプラン選択もリセット（ヒーロー CTA から #/wizard へ直接入った場合に前回プランが残る漏れを防ぐ）
+    setWizardPlan('free')
     navigate(`/${lang}`)
   }
 

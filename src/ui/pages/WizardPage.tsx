@@ -5,11 +5,14 @@ import { useTranslation } from '../../i18n/useTranslation'
 import { ProgressBar } from '../components/ProgressBar'
 import { ChoiceCard } from '../components/ChoiceCard'
 import { TextInput } from '../components/TextInput'
+import { PixelDolphin } from '../components/PixelDolphin'
+import { MascotCorner } from '../components/MascotCorner'
 import type { Lang } from '../../i18n/types'
 import type { ChoiceQuestion, TextQuestion } from '../../wizard/types'
 import { trackEvent } from '../../analytics/events'
 
-const SHORTCUTS = ['A', 'B', 'C', 'D', 'E', 'F']
+// Q1 は 7 択のため H まで確保（不足すると末尾の選択肢にショートカットが割り当たらない）
+const SHORTCUTS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 type Props = {
   lang: Lang
@@ -50,6 +53,11 @@ export function WizardPage({ onComplete, onCancel }: Props) {
     dispatch({ type: 'NEXT' })
   }, [canProceed, question.id, state, total, dispatch, onComplete])
 
+  const handleCancel = useCallback(() => {
+    dispatch({ type: 'CANCEL' })
+    onCancel()
+  }, [dispatch, onCancel])
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return
@@ -57,6 +65,10 @@ export function WizardPage({ onComplete, onCancel }: Props) {
       if (e.isComposing) return
       if (e.key === 'Enter') {
         handleNext()
+        return
+      }
+      if (e.key === 'Escape') {
+        handleCancel()
         return
       }
       if (question.type === 'choice') {
@@ -69,35 +81,74 @@ export function WizardPage({ onComplete, onCancel }: Props) {
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [handleNext, question, dispatch])
+  }, [handleNext, handleCancel, question, dispatch])
 
   return (
     <div className="min-h-screen bg-cream flex flex-col md:flex-row">
-      <aside className="bg-ink text-dark-card-surface md:w-5/12 p-8 flex flex-col gap-6">
-        <div>
+      <aside
+        className="relative bg-ink text-dark-card-surface md:w-[440px] md:shrink-0 p-8 flex flex-col gap-6"
+        aria-label={t('wizard.question_of', { current: state.currentIndex + 1, total })}
+      >
+        {/* ドット背景テクスチャ（ダークパネル用・密） */}
+        <div aria-hidden="true" className="absolute inset-0 bg-dot-texture-dense opacity-[0.35] pointer-events-none" />
+
+        <div className="relative flex items-center gap-2">
+          <PixelDolphin size={22} />
+          <span className="font-mono text-xs font-bold">ClaudeWizard</span>
+          <span className="font-mono text-[10px] text-ink-faint">· {state.plan} plan</span>
+        </div>
+
+        <div className="relative">
           <p className="font-mono text-[11px] uppercase tracking-widest mb-1">
             <span className="text-orange">{t('wizard.question_of', { current: state.currentIndex + 1, total })}</span>
           </p>
-          <h1 className="font-display font-black text-3xl md:text-4xl leading-tight mb-3">
+          <h1 className="font-display font-black text-3xl md:text-4xl leading-snug mb-3">
             {t(question.titleKey)}
           </h1>
-          <p className="text-ink-faint text-sm">{t(question.subtitleKey)}</p>
+          <p className="text-ink-faint text-sm leading-relaxed">{t(question.subtitleKey)}</p>
         </div>
 
-        <ProgressBar current={state.currentIndex + 1} total={total} />
+        <div className="relative">
+          <ProgressBar current={state.currentIndex + 1} total={total} />
+        </div>
 
         {question.tipKey && (
-          <div className="border border-dashed border-dark-card-divider rounded-lg p-4 mt-auto">
-            <p className="text-xs font-bold text-orange mb-1">{t('wizard.tip_label')}</p>
-            <p className="text-xs text-ink-faint">{t(question.tipKey)}</p>
+          <div className="relative bg-line-strong rounded-card-sm p-4 mt-auto">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-orange mb-1.5">
+              {t('wizard.tip_label')}
+            </p>
+            <p className="text-xs text-ink-faint leading-relaxed">{t(question.tipKey)}</p>
           </div>
         )}
       </aside>
 
-      <main className="flex-1 p-8 flex flex-col gap-6">
-        <div className="flex-1 flex flex-col gap-3">
+      <main className="relative flex-1 p-6 md:px-12 md:py-10 flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-4">
+            {state.currentIndex > 0 && (
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'BACK' })}
+                className="font-mono text-xs text-ink-muted hover:text-ink transition-colors"
+              >
+                ← {t('wizard.back')}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="font-mono text-xs text-ink-muted hover:text-ink transition-colors"
+            >
+              {t('wizard.cancel')}
+            </button>
+          </div>
+          <span className="hidden md:inline font-mono text-[11px] text-ink-muted">{t('wizard.key_hint')}</span>
+        </div>
+
+        {/* key={question.id} で質問が変わるたびに再マウントし、遷移アニメーションを再生する */}
+        <div key={question.id} data-testid="question-area" className="flex-1 animate-fade-in">
           {question.type === 'choice' && (
-            <>
+            <div className="grid md:grid-cols-2 gap-3 content-start">
               {(question as ChoiceQuestion).options.map((opt, i) => (
                 <ChoiceCard
                   key={opt.value}
@@ -107,7 +158,7 @@ export function WizardPage({ onComplete, onCancel }: Props) {
                   onClick={() => dispatch({ type: 'SET_ANSWER', questionId: question.id, answer: opt.value })}
                 />
               ))}
-            </>
+            </div>
           )}
           {question.type === 'text' && (
             <TextInput
@@ -121,32 +172,43 @@ export function WizardPage({ onComplete, onCancel }: Props) {
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-line-faint">
-          <div className="flex gap-4">
-            {state.currentIndex > 0 && (
-              <button
-                type="button"
-                onClick={() => dispatch({ type: 'BACK' })}
-                className="text-sm text-ink-muted hover:text-ink transition-colors"
-              >
-                ← {t('wizard.back')}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => { dispatch({ type: 'CANCEL' }); onCancel() }}
-              className="text-sm text-ink-muted hover:text-ink transition-colors"
-            >
-              {t('wizard.cancel')}
-            </button>
-          </div>
+        {/* 進捗を励ますコーナーマスコット（CTA フッターと重ならないよう持ち上げる） */}
+        <MascotCorner
+          size={88}
+          className="!bottom-24"
+          text={
+            state.currentIndex === total - 1
+              ? t('wizard.mascot_last')
+              : t('wizard.mascot_progress', {
+                  current: state.currentIndex + 1,
+                  remaining: total - state.currentIndex - 1,
+                })
+          }
+        />
+
+        {/* CTA フッター: モバイルでは sticky bottom（多択質問でも次へが画面外に出ない）、md 以上は通常配置 */}
+        <div
+          data-testid="wizard-cta-footer"
+          className="sticky bottom-0 md:static bg-cream border-t border-line-faint pt-3 pb-3 md:pb-0 md:pt-4 flex items-center gap-3 md:justify-end"
+        >
+          <span className="md:hidden flex items-center gap-2" aria-hidden="true">
+            <PixelDolphin size={26} />
+            <span className="font-mono text-xs text-ink-muted">
+              {state.currentIndex + 1}/{total}
+            </span>
+          </span>
           <button
             type="button"
             onClick={handleNext}
             disabled={!canProceed()}
             className={[
-              'btn-primary px-6 py-2 text-sm',
-              !canProceed() ? 'opacity-50 cursor-not-allowed' : '',
+              'flex-1 md:flex-none bg-orange text-white font-display font-bold rounded-card-sm px-9 py-3 text-[15px]',
+              'shadow-cta-down transition-all duration-150 motion-reduce:transition-none',
+              'hover:bg-orange-hover',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2',
+              canProceed()
+                ? 'hover:-translate-y-px active:translate-y-[3px] active:shadow-none motion-reduce:hover:translate-y-0'
+                : 'opacity-50 cursor-not-allowed',
             ].join(' ')}
           >
             {t('wizard.next')}

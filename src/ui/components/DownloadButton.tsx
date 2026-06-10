@@ -21,7 +21,7 @@ export function DownloadButton({ onDownload, disabled = false, loading = false }
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2',
         disabled || loading
           ? 'bg-line-faint text-ink-muted cursor-not-allowed'
-          : 'bg-orange text-white hover:bg-orange-dark active:scale-[0.98]',
+          : 'bg-orange text-white hover:bg-orange-hover hover:-translate-y-px motion-reduce:hover:translate-y-0 active:scale-[0.98]',
       ].join(' ')}
     >
       {loading ? t('common.loading') : t('result.download_label')}

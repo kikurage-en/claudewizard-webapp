@@ -45,17 +45,17 @@ describe('WizardPage', () => {
     // Q1は選択肢式なのでChoiceCardが表示される
     expect(screen.getByText('A')).toBeInTheDocument()
     expect(screen.getByText('B')).toBeInTheDocument()
+    // Q1 は 7 択 → 7 番目にもショートカットが割り当てられる（A-F 6 個では欠落する）
+    expect(screen.getByText('G')).toBeInTheDocument()
   })
 
-  it('選択肢を選んで次へ進める', () => {
+  it('選択肢を選ぶと次へボタンが有効になる', () => {
     renderWizardPage()
-    // 最初の選択肢カードをクリック
-    const choiceCards = document.querySelectorAll('[class*="cursor-pointer"]')
-    if (choiceCards.length > 0) {
-      fireEvent.click(choiceCards[0])
-    }
     const nextBtn = screen.getByRole('button', { name: /次へ|next/i })
-    expect(nextBtn).toBeInTheDocument()
+    expect(nextBtn).toBeDisabled()
+    const choices = screen.getAllByRole('button', { pressed: false })
+    fireEvent.click(choices[0])
+    expect(nextBtn).toBeEnabled()
   })
 
   it('キャンセルボタンを押すとonCancelが呼ばれる', () => {
@@ -93,6 +93,42 @@ describe('WizardPage', () => {
     // Free は WizardPage で生成・DL せず、CompletePage で同意後に行う
     expect(vi.mocked(generate)).not.toHaveBeenCalled()
     expect(onComplete).toHaveBeenCalledTimes(1)
+  })
+
+  it('CTA フッターがモバイルで sticky になる構造を持つ', () => {
+    renderWizardPage()
+    const footer = screen.getByTestId('wizard-cta-footer')
+    expect(footer.className).toContain('sticky')
+    expect(footer.className).toContain('bottom-0')
+  })
+
+  it('キーヒント（ESC で中断 · ⏎ で次へ）が表示される', () => {
+    renderWizardPage()
+    expect(screen.getByText('ESC で中断 · ⏎ で次へ')).toBeInTheDocument()
+  })
+
+  it('Escape キーで中断（onCancel）できる', () => {
+    const onCancel = vi.fn()
+    renderWizardPage(vi.fn(), onCancel)
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(onCancel).toHaveBeenCalledTimes(1)
+  })
+
+  it('コーナーマスコットが進捗の吹き出しを表示する（最終問はラスト表記）', () => {
+    renderWizardPage()
+    // Q1: free は 3 問 → 残り 2 問
+    expect(screen.getByText('1問目、あと2問です！')).toBeInTheDocument()
+    // Q3（最終問）まで進める
+    fireEvent.click(screen.getAllByRole('button', { pressed: false })[0])
+    fireEvent.click(screen.getByRole('button', { name: /次へ|next/i }))
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'proj' } })
+    fireEvent.click(screen.getByRole('button', { name: /次へ|next/i }))
+    expect(screen.getByText('ラストの質問です！')).toBeInTheDocument()
+  })
+
+  it('質問エリアに遷移アニメーションのフックが付く', () => {
+    renderWizardPage()
+    expect(screen.getByTestId('question-area').className).toContain('animate-fade-in')
   })
 
   it('IME 変換確定の Enter（isComposing）では次へ進まない（日本語入力対応）', () => {

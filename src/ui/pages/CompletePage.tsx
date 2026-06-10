@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from '../../i18n/useTranslation'
 import { Mascot } from '../components/Mascot'
+import { PixelDolphin } from '../components/PixelDolphin'
+import { MascotCorner } from '../components/MascotCorner'
 import { DownloadButton } from '../components/DownloadButton'
 import { ConsentCheckbox } from '../components/ConsentCheckbox'
 import { ErrorBanner, mapErrorToCode, type ErrorCode } from '../components/ErrorBanner'
@@ -9,6 +11,7 @@ import { generate } from '../../generator/generate'
 import { downloadBlob } from '../../generator/zipBuilder'
 import { trackEvent } from '../../analytics/events'
 import { getManifest } from '../../templates/manifest'
+import { getQuestions } from '../../wizard/questions'
 
 type Props = {
   lang: Lang
@@ -23,6 +26,8 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
   const [loading, setLoading] = useState(false)
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null)
   const manifest = getManifest(plan)
+  const questionCount = getQuestions(plan).length
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   const handleDownload = async () => {
     if (!consented || loading) return
@@ -42,17 +47,42 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
     }
   }
 
+  const handleShare = () => {
+    const url = `${window.location.origin}${window.location.pathname}#/${lang}/`
+    navigator.share({ title: 'ClaudeWizard', url }).catch(() => {
+      // ユーザーキャンセル等は無視（エラー表示しない）
+    })
+  }
+
   return (
-    <main className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 py-16">
+    <main className="relative min-h-screen bg-cream flex flex-col items-center px-6 py-12 md:py-16">
+      <MascotCorner text={t('result.mascot_bubble')} size={88} />
       <div className="max-w-lg w-full text-center">
+        {/* 全問完了の視覚化ドット */}
+        <div className="flex items-center justify-center gap-1.5 mb-6" aria-hidden="true">
+          {Array.from({ length: questionCount }, (_, i) => (
+            <span key={i} data-testid="complete-dot" className="w-[7px] h-[7px] rounded-full bg-orange" />
+          ))}
+        </div>
+
         <Mascot size="lg" className="mb-6" />
 
-        <span className="inline-block font-mono text-xs font-bold tracking-widest uppercase bg-orange text-white px-3 py-1 rounded-full mb-4">
+        <span
+          data-testid="done-badge"
+          className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-widest uppercase
+                     bg-orange text-white border-[1.5px] border-ink shadow-offset-ink-sm
+                     px-3 py-1.5 rounded-full mb-5 -rotate-2"
+        >
+          <PixelDolphin size={18} />
           {t('result.done_badge')}
         </span>
 
-        <h1 className="font-display font-black text-4xl text-ink mb-3">{t('result.title')}</h1>
-        <p className="text-ink-muted mb-8">{t('result.subtitle')}</p>
+        <h1 className="font-display font-black text-5xl md:text-6xl text-ink tracking-tight mb-4">
+          <span style={{ background: 'linear-gradient(transparent 62%, rgba(217, 119, 87, 0.33) 62%)' }}>
+            {t('result.title')}
+          </span>
+        </h1>
+        <p className="text-ink-muted mb-2">{t('result.subtitle')}</p>
         <p className="text-sm text-ink-muted mb-8">{t('result.description')}</p>
 
         {errorCode && (
@@ -65,33 +95,63 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
           </div>
         )}
 
-        <div className="card bg-white p-6 mb-6 text-left">
-          <h2 className="font-bold text-sm text-ink mb-4">{t('result.files_title')}</h2>
-          <ul className="space-y-2">
-            {manifest.map((entry) => (
-              <li key={entry.zipPath} className="flex items-center gap-2">
-                <span className="text-orange text-xs">◆</span>
-                <code className="text-xs font-mono text-ink-muted border border-dashed border-line-faint px-2 py-0.5 rounded">
-                  {entry.zipPath}
-                </code>
+        {/* 生成ファイルカード（border 2px ink + 厚いオフセット影） */}
+        <div className="bg-white border-2 border-ink rounded-[16px] shadow-offset-ink p-5 mb-8 text-left">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-3">
+            {t('result.files_caption', { count: manifest.length })}
+          </p>
+          <ul>
+            {manifest.map((entry, i) => (
+              <li
+                key={entry.zipPath}
+                data-testid="file-item"
+                className={[
+                  'flex items-center gap-3 py-2',
+                  i < manifest.length - 1 ? 'border-b border-dashed border-line-faint' : '',
+                ].join(' ')}
+              >
+                <span className="text-orange font-black text-base" aria-hidden="true">✓</span>
+                <span className="font-mono text-[13px] font-bold text-ink">{entry.zipPath}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="mb-4">
-          <ConsentCheckbox checked={consented} onChange={setConsented} lang={lang} />
-        </div>
-
-        <DownloadButton onDownload={handleDownload} disabled={!consented} loading={loading} />
-
-        <button
-          type="button"
-          onClick={onTryAgain}
-          className="mt-4 text-sm text-ink-muted hover:text-ink transition-colors"
+        {/* エラーバナー表示中は下フォームを無効化（半透明 + pointer-events:none、FR-11） */}
+        <div
+          data-testid="complete-form"
+          className={errorCode ? 'opacity-50 pointer-events-none select-none' : ''}
         >
-          {t('result.try_again')}
-        </button>
+          <div className="mb-4 text-left inline-block">
+            <ConsentCheckbox checked={consented} onChange={setConsented} lang={lang} />
+          </div>
+
+          <DownloadButton onDownload={handleDownload} disabled={!consented} loading={loading} />
+
+          <div className="mt-4 flex gap-3 justify-center">
+            <button
+              type="button"
+              onClick={onTryAgain}
+              className="flex-1 bg-white text-ink border-[1.5px] border-ink rounded-btn font-bold text-sm py-2.5
+                         hover:bg-cream hover:-translate-y-px transition-all duration-200
+                         motion-reduce:transition-none motion-reduce:hover:translate-y-0
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2"
+            >
+              {t('result.back_to_top')}
+            </button>
+            {canShare && (
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex-1 bg-white text-ink border-[1.5px] border-ink rounded-btn font-bold text-sm py-2.5
+                           hover:bg-cream transition-colors
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2"
+              >
+                {t('result.share_label')}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   )

@@ -82,7 +82,7 @@ export function ApiKeyPage({ plan, onContinue, onCancel }: Props) {
           <ul className="space-y-2 mb-8">
             {(['check1', 'check2', 'check3'] as const).map((key) => (
               <li key={key} className="flex items-start gap-2 text-xs text-ink-muted">
-                <span className="text-green-600 font-bold mt-0.5">✓</span>
+                <span className="text-orange font-bold mt-0.5" aria-hidden="true">✓</span>
                 <span>{t(`api_key.${key}`)}</span>
               </li>
             ))}

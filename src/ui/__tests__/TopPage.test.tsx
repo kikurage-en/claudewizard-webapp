@@ -42,8 +42,36 @@ describe('TopPage', () => {
     expect(plusCard).toHaveAttribute('aria-disabled', 'true')
   })
 
-  it('ヒーローセクションのCTAが表示される', () => {
+  it('ヒーローセクションのCTAがウィザードへのリンクとして表示される', () => {
     renderTopPage()
-    expect(screen.getByRole('link', { name: /無料で始める/ })).toBeInTheDocument()
+    const cta = screen.getByRole('link', { name: /はじめる/ })
+    expect(cta).toHaveAttribute('href', '#/ja/wizard')
+  })
+
+  it('H1 の強調語（設定ファイル）がマーカー付きで表示される', () => {
+    renderTopPage()
+    const highlight = screen.getByTestId('hero-highlight')
+    expect(highlight).toHaveTextContent('設定ファイル')
+  })
+
+  it('3 ステップチップが表示される', () => {
+    renderTopPage()
+    expect(screen.getAllByTestId('step-chip')).toHaveLength(3)
+    expect(screen.getByText('プランを選ぶ')).toBeInTheDocument()
+    expect(screen.getByText('質問に答える')).toBeInTheDocument()
+    expect(screen.getByText('ZIPでダウンロード')).toBeInTheDocument()
+  })
+
+  it('生成物のファイルスタンプが 5 枚表示される', () => {
+    renderTopPage()
+    const stamps = screen.getAllByTestId('file-stamp')
+    expect(stamps).toHaveLength(5)
+    expect(stamps.map((s) => s.textContent)).toEqual([
+      'CLAUDE.md',
+      'rules/*.md',
+      'hooks/',
+      'SKILL.md',
+      '.claude/',
+    ])
   })
 })

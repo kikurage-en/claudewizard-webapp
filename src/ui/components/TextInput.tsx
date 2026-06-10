@@ -29,10 +29,11 @@ export function TextInput({ id, label, value, placeholder, onChange, onEnter, is
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
+        aria-invalid={isValid === false || undefined}
         className={[
-          'w-full px-4 py-3 rounded-lg border-[1.5px] font-mono text-sm bg-white text-ink',
+          'w-full px-4 py-3 rounded-btn border-[1.5px] font-mono text-sm bg-white text-ink',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-orange transition-colors',
-          isValid === false ? 'border-red-400' : 'border-line-faint focus:border-orange',
+          isValid === false ? 'border-danger' : 'border-line-faint focus:border-orange',
         ].join(' ')}
         autoComplete="off"
         spellCheck={false}

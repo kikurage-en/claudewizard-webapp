@@ -61,17 +61,18 @@ export function ErrorBanner({ code, onRetry, onDismiss }: Props) {
   const category = CATEGORY_MAP[code]
   const message = t(MESSAGE_KEY[code])
 
+  // 配色はデザイン正 wf-static-errors.jsx の暖色系（fatal=danger / auto_recovery=danger-soft / user_action=orange）
   const colorClasses =
     category === 'fatal'
-      ? 'bg-red-50 border-red-500 text-red-900'
+      ? 'bg-white border-danger'
       : category === 'auto_recovery'
-        ? 'bg-yellow-50 border-yellow-500 text-yellow-900'
-        : 'bg-orange-50 border-orange-500 text-orange-900'
+        ? 'bg-cream border-danger-soft'
+        : 'bg-cream-peach border-orange'
 
   return (
     <div
       role="alert"
-      className={`border-l-4 p-4 rounded ${colorClasses}`}
+      className={`border-2 border-l-8 p-4 rounded-card-sm text-ink ${colorClasses}`}
       data-testid="error-banner"
       data-category={category}
       data-code={code}

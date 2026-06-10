@@ -1,5 +1,15 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page, type Locator } from '@playwright/test'
 import JSZip from 'jszip'
+
+// Tab 連打で対象要素へフォーカスを移す（キーボードのみ操作の検証用）
+async function tabTo(page: Page, target: Locator, maxTabs = 16) {
+  for (let i = 0; i < maxTabs; i++) {
+    const focused = await target.evaluate((el) => el === document.activeElement).catch(() => false)
+    if (focused) return
+    await page.keyboard.press('Tab')
+  }
+  expect(await target.evaluate((el) => el === document.activeElement)).toBe(true)
+}
 
 test.describe('Free プラン完走フロー', () => {
   test.beforeEach(async ({ page }) => {
@@ -110,6 +120,41 @@ test.describe('Free プラン完走フロー', () => {
     expect(claudeMd).toContain('TestProject')
     expect(claudeMd).not.toMatch(/書く。|に置き換える/)
     expect(claudeMd).toContain('TypeScript') // 最初の言語選択肢の実値化
+  })
+
+  test('キーボードのみでウィザードを完走できる（NFR-4）', async ({ page }) => {
+    await page.getByRole('button', { name: /フリー/ }).click()
+    await expect(page).toHaveURL(/#\/ja\/wizard/)
+
+    // Q1: ショートカットキー A で選択 → Enter で次へ
+    await page.keyboard.press('a')
+    await page.keyboard.press('Enter')
+    await expect(page.getByText(/質問 2 \/ 3/)).toBeVisible()
+
+    // Q2: Tab で入力欄へ → 入力 → Enter で次へ
+    const textbox = page.getByRole('textbox')
+    await tabTo(page, textbox)
+    await page.keyboard.type('KeyboardProject')
+    await page.keyboard.press('Enter')
+    await expect(page.getByText(/質問 3 \/ 3/)).toBeVisible()
+
+    // Q3: ショートカットキー A で選択 → Enter で完了
+    await page.keyboard.press('a')
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(/#\/ja\/complete/, { timeout: 15000 })
+
+    // 同意チェックボックスへ Tab → Space でチェック → DL ボタンが有効化される
+    const checkbox = page.getByRole('checkbox')
+    await tabTo(page, checkbox)
+    await page.keyboard.press('Space')
+    await expect(page.getByRole('button', { name: /ダウンロード/i })).toBeEnabled()
+  })
+
+  test('Escape キーでウィザードを中断してトップへ戻れる', async ({ page }) => {
+    await page.getByRole('button', { name: /フリー/ }).click()
+    await expect(page).toHaveURL(/#\/ja\/wizard/)
+    await page.keyboard.press('Escape')
+    await expect(page).toHaveURL(/#\/ja$/)
   })
 
   test('戻るボタンで前の質問に戻れる', async ({ page }) => {

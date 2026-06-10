@@ -1,18 +1,18 @@
+import { PixelDolphin } from './PixelDolphin'
+
 type Props = {
   size?: 'sm' | 'md' | 'lg'
   className?: string
 }
 
-const SIZE_MAP = { sm: 'text-2xl', md: 'text-4xl', lg: 'text-7xl' }
+// デザイン仕様（ui-domain.md）: ウィザード 24-36px / ヒーロー周辺 36px / 完了画面 96px
+const SIZE_MAP = { sm: 24, md: 36, lg: 96 }
 
+// 装飾要素のためスクリーンリーダーには公開しない（aria-hidden）
 export function Mascot({ size = 'md', className = '' }: Props) {
   return (
-    <span
-      role="img"
-      aria-label="ClaudeWizard mascot dolphin"
-      className={`inline-block select-none ${SIZE_MAP[size]} ${className}`}
-    >
-      🐬
+    <span aria-hidden="true" className={`inline-block select-none ${className}`}>
+      <PixelDolphin size={SIZE_MAP[size]} />
     </span>
   )
 }

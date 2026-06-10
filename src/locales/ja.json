@@ -12,18 +12,30 @@
   },
   "nav": {
     "top": "トップ",
-    "guide": "使い方",
     "faq": "FAQ",
     "github": "GitHub",
     "start": "はじめる",
     "language": "English",
-    "menu": "メニュー"
+    "language_switch": "英語に切り替え",
+    "menu": "メニュー",
+    "aria_main": "メインナビゲーション"
+  },
+  "footer": {
+    "tagline": "Claude Code 設定ファイル生成ウィザード"
   },
   "hero": {
-    "title": "Claude Code の設定ファイル、\n質問に答えるだけで完成。",
-    "subtitle": "CLAUDE.md / rules / hooks / SKILL.md を一括生成。ブラウザ完結・BYOK・サーバー不要。",
-    "cta_primary": "無料で始める",
-    "cta_secondary": "使い方を見る"
+    "badge": "BYOK · 0円運営 · ブラウザ完結",
+    "title": "Claude Codeの\n設定ファイル、\nちゃんと書けてますか？",
+    "title_highlight": "設定ファイル",
+    "subtitle": "CLAUDE.md / rules / hooks / skills ——\n正しい構造で一括生成するウィザード。ブラウザだけで動きます。",
+    "cta_primary": "はじめる →",
+    "cta_secondary": "詳しい使い方を見る →",
+    "meta": "3〜6問に答えるだけ · 所要時間 約3分",
+    "step1": "プランを選ぶ",
+    "step2": "質問に答える",
+    "step3": "ZIPでダウンロード",
+    "generates": "generates →",
+    "mascot_bubble": "はじめましょう！お手伝いします"
   },
   "plans": {
     "select_title": "プランを選択",
@@ -74,6 +86,9 @@
     "cancel": "キャンセル",
     "generating": "設定ファイルを生成中...",
     "tip_label": "💡 ヒント",
+    "key_hint": "ESC で中断 · ⏎ で次へ",
+    "mascot_progress": "{{current}}問目、あと{{remaining}}問です！",
+    "mascot_last": "ラストの質問です！",
     "q1": {
       "title": "主にどの分野で Claude を使いますか？",
       "subtitle": "最も近いものを選んでください",
@@ -168,11 +183,14 @@
     "subtitle": "設定ファイルが生成されました",
     "description": "ZIP をダウンロードして、プロジェクトのルートディレクトリに展開してください。",
     "files_title": "生成されたファイル",
+    "files_caption": "GENERATED FILES · {{count}}",
     "consent_label": "利用規約に同意する",
     "download_label": "ZIP をダウンロード",
     "download_disabled": "利用規約に同意するとダウンロードできます",
     "placement_guide": "使い方ガイドを見る",
-    "try_again": "もう一度生成する",
+    "back_to_top": "トップへ戻る",
+    "share_label": "SNSでシェア",
+    "mascot_bubble": "おつかれさまでした！🎉",
     "zip_filename": "claudewizard-config.zip"
   },
   "errors": {
@@ -193,6 +211,10 @@
       "failed": "ファイルの生成に失敗しました。もう一度お試しください。",
       "zip_failed": "ZIP の作成に失敗しました。ページを再読み込みして試してください。",
       "unavailable": "このプランはまだ利用できません。準備が整うまでお待ちください。"
+    },
+    "not_found": {
+      "message": "ページが見つかりませんでした。",
+      "back_home": "ホームへ戻る"
     }
   },
   "legal": {
