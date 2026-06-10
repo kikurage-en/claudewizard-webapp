@@ -155,3 +155,76 @@ describe('CompletePage（統一フロー: 同意 → 生成 → DL）', () => {
     expect(screen.getByTestId('complete-form').className).not.toContain('pointer-events-none')
   })
 })
+
+// 生成は DL ボタン押下時に 1 回だけ実行し、Blob をブラウザ内に保持する（Light の API 再課金防止）。
+// 画面は生成前（準備完了）/ 生成後（完成）の 2 状態で、文言と実態を一致させる。
+describe('CompletePage（2 状態表示 + Blob キャッシュ）', () => {
+  beforeEach(() => {
+    generateMock.mockReset()
+    generateMock.mockResolvedValue(new Blob(['test'], { type: 'application/zip' }))
+    vi.mocked(downloadBlob).mockClear()
+    vi.mocked(trackEvent).mockClear()
+  })
+
+  it('DL を 2 回実行しても generate は 1 回のみ・downloadBlob は 2 回（API 再課金なし）', async () => {
+    renderComplete('light')
+    fireEvent.click(screen.getByRole('checkbox'))
+    fireEvent.click(screen.getByRole('button', { name: /ダウンロード/i }))
+    await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalledTimes(1))
+
+    // 生成後は「再ダウンロード」ラベルになり、クリックしても generate は走らない
+    fireEvent.click(screen.getByRole('button', { name: /再ダウンロード/ }))
+    await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalledTimes(2))
+    expect(generateMock).toHaveBeenCalledTimes(1)
+    // ダウンロード数の計測（zip_download）は 2 回とも発火する
+    expect(
+      vi.mocked(trackEvent).mock.calls.filter(([name]) => name === 'zip_download')
+    ).toHaveLength(2)
+  })
+
+  it('生成前は「準備完了」表示で ✓ なし、生成成功後に「完成！生成されました」+ ✓ に切替', async () => {
+    renderComplete('light')
+    // 生成前: 完了系文言・✓ が出ない（文言と実態の整合）
+    expect(screen.getByText('準備完了！')).toBeInTheDocument()
+    expect(screen.queryByText('完成！')).not.toBeInTheDocument()
+    expect(screen.queryByText('設定ファイルが生成されました')).not.toBeInTheDocument()
+    expect(screen.getByText(/FILES TO GENERATE/)).toBeInTheDocument()
+    expect(screen.queryAllByText('✓')).toHaveLength(0)
+
+    fireEvent.click(screen.getByRole('checkbox'))
+    fireEvent.click(screen.getByRole('button', { name: /ダウンロード/i }))
+
+    // 生成後: 完成表示・GENERATED FILES・全行 ✓・再ダウンロードラベル
+    await waitFor(() => expect(screen.getByText('完成！')).toBeInTheDocument())
+    expect(screen.getByText('設定ファイルが生成されました')).toBeInTheDocument()
+    expect(screen.queryByText('準備完了！')).not.toBeInTheDocument()
+    expect(screen.getByText(/GENERATED FILES/)).toBeInTheDocument()
+    expect(screen.getAllByText('✓')).toHaveLength(8) // light = 8 ファイル
+    expect(screen.getByRole('button', { name: /再ダウンロード/ })).toBeInTheDocument()
+  })
+
+  it('生成失敗時はキャッシュされず準備完了表示のまま、リトライで generate が再実行される', async () => {
+    generateMock.mockReset()
+    generateMock
+      .mockRejectedValueOnce(new AnthropicClientError('server down', 'server'))
+      .mockResolvedValueOnce(new Blob(['x']))
+    renderComplete('light')
+    fireEvent.click(screen.getByRole('checkbox'))
+    fireEvent.click(screen.getByRole('button', { name: /ダウンロード/i }))
+    await waitFor(() => expect(screen.getByTestId('error-banner')).toBeInTheDocument())
+    // 失敗時は完成に切り替わらない（false DONE の防止）
+    expect(screen.queryByText('設定ファイルが生成されました')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '再試行' }))
+    await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalledTimes(1))
+    expect(generateMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('課金注記（API 1 回のみ・再 DL 課金なし）は light のみ表示・free では非表示', () => {
+    const { unmount } = renderComplete('light')
+    expect(screen.getByText(/追加の課金は発生しません/)).toBeInTheDocument()
+    unmount()
+    renderComplete('free')
+    expect(screen.queryByText(/追加の課金は発生しません/)).not.toBeInTheDocument()
+  })
+})

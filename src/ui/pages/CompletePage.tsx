@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from '../../i18n/useTranslation'
 import { Mascot } from '../components/Mascot'
 import { PixelDolphin } from '../components/PixelDolphin'
@@ -25,16 +25,32 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
   const [consented, setConsented] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null)
+  // 生成済み ZIP の保持（要件 §4.4 #2「結果をブラウザ内に保持」）。
+  // 再ダウンロードは再生成しない＝Light の Claude API 再課金を防ぐ。失敗時は保持しない。
+  const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null)
+  const generated = generatedBlob !== null
   const manifest = getManifest(plan)
   const questionCount = getQuestions(plan).length
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
+  // 言語・プラン変更時はキャッシュを破棄（生成物言語は UI 言語連動のため）
+  useEffect(() => {
+    setGeneratedBlob(null)
+  }, [lang, plan])
+
   const handleDownload = async () => {
     if (!consented || loading) return
+    // 生成済みなら再ダウンロードのみ（zip_download はダウンロード数として毎回計測）
+    if (generatedBlob) {
+      downloadBlob(generatedBlob, t('result.zip_filename'))
+      trackEvent('zip_download', { plan })
+      return
+    }
     setLoading(true)
     setErrorCode(null) // 試行開始時にクリア（リトライ成功で古いバナーが残らない）
     try {
       const blob = await generate(plan, lang, answers)
+      setGeneratedBlob(blob)
       downloadBlob(blob, t('result.zip_filename'))
       trackEvent('zip_download', { plan })
     } catch (err) {
@@ -74,15 +90,17 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
                      px-3 py-1.5 rounded-full mb-5 -rotate-2"
         >
           <PixelDolphin size={18} />
-          {t('result.done_badge')}
+          {generated ? t('result.done_badge') : t('result.ready_badge')}
         </span>
 
         <h1 className="font-display font-black text-5xl md:text-6xl text-ink tracking-tight mb-4">
           <span style={{ background: 'linear-gradient(transparent 62%, rgba(217, 119, 87, 0.33) 62%)' }}>
-            {t('result.title')}
+            {generated ? t('result.title') : t('result.ready_title')}
           </span>
         </h1>
-        <p className="text-ink-muted mb-2">{t('result.subtitle')}</p>
+        <p className="text-ink-muted mb-2">
+          {generated ? t('result.subtitle') : t('result.ready_subtitle')}
+        </p>
         <p className="text-sm text-ink-muted mb-8">{t('result.description')}</p>
 
         {errorCode && (
@@ -98,7 +116,9 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
         {/* 生成ファイルカード（border 2px ink + 厚いオフセット影） */}
         <div className="bg-white border-2 border-ink rounded-[16px] shadow-offset-ink p-5 mb-8 text-left">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-3">
-            {t('result.files_caption', { count: manifest.length })}
+            {generated
+              ? t('result.files_caption', { count: manifest.length })
+              : t('result.files_caption_pending', { count: manifest.length })}
           </p>
           <ul>
             {manifest.map((entry, i) => (
@@ -110,7 +130,12 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
                   i < manifest.length - 1 ? 'border-b border-dashed border-line-faint' : '',
                 ].join(' ')}
               >
-                <span className="text-orange font-black text-base" aria-hidden="true">✓</span>
+                {/* 生成前は中立ドット、生成成功後に ✓（文言と実態の整合） */}
+                {generated ? (
+                  <span className="text-orange font-black text-base" aria-hidden="true">✓</span>
+                ) : (
+                  <span className="text-ink-muted font-black text-base" aria-hidden="true">·</span>
+                )}
                 <span className="font-mono text-[13px] font-bold text-ink">{entry.zipPath}</span>
               </li>
             ))}
@@ -126,7 +151,17 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
             <ConsentCheckbox checked={consented} onChange={setConsented} lang={lang} />
           </div>
 
-          <DownloadButton onDownload={handleDownload} disabled={!consented} loading={loading} />
+          <DownloadButton
+            onDownload={handleDownload}
+            disabled={!consented}
+            loading={loading}
+            label={generated ? t('result.download_again_label') : undefined}
+          />
+
+          {/* Light は BYOK 課金の透明性を明示（生成は 1 回のみ・再 DL は無課金） */}
+          {plan === 'light' && (
+            <p className="mt-3 text-xs text-ink-muted">{t('result.light_billing_note')}</p>
+          )}
 
           <div className="mt-4 flex gap-3 justify-center">
             <button

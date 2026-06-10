@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## v0.4.1 (2026-06-11)
+
+### 完了画面の整合性修正（2 状態表示 + Blob キャッシュで API 再課金防止）
+
+ユーザー指摘 2 件に対応: (1) 生成前から「完成！設定ファイルが生成されました」と表示される文言と実態（DL ボタン押下時に生成）の不整合、(2) DL ボタンを押すたびに生成が再実行され Light で毎回 API 課金が発生する問題。
+
+#### 修正
+
+- `CompletePage`: 生成済み Blob を state に保持し、2 回目以降のダウンロードは再生成せず Blob を再利用（Light の Claude API 再課金を解消。Free も再 ZIP 組成が不要に）。失敗時は保持せずリトライで再生成。言語/プラン変更時はキャッシュ破棄
+- 完了画面を 2 状態化: 生成前は「🚀 READY! 準備完了！／ZIP をダウンロードすると設定ファイルを生成します／FILES TO GENERATE・中立ドット」、生成成功後に「✨ DONE! 完成！／生成されました／GENERATED FILES・✓／ZIP を再ダウンロード」へ切替
+- Light のみ DL ボタン直下に課金透明性の注記「生成は Claude API を 1 回だけ呼び出します。再ダウンロードで追加の課金は発生しません。」を表示
+- `DownloadButton` に label prop 追加（未指定時は従来どおり）／locales（ja/en）に result 配下 6 キー追加
+
+#### テスト・検証
+
+- 新規 4 件（2 回クリックで generate 1 回のみ・失敗時非キャッシュ・2 状態文言切替・課金注記の plan 別表示）。全体 467 件 PASS / typecheck PASS / coverage 91.15・85.01・95.83・93.46（閾値超）
+- spec 改訂: requirements.md FR-4（Blob 保持・2 状態・課金注記）/ acceptance.md Phase 1 注記
+
 ## v0.4.0 (2026-06-10)
 
 ### 生成物の「ベストプラクティス」接地強化（domain 適合 + CLI 必須 rules 完備）
