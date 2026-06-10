@@ -1,5 +1,39 @@
 # CHANGELOG
 
+## v0.3.0 (2026-06-10)
+
+### フロントエンド UI ブラッシュアップ（デザイン確定版寄せ + 品質課題解消）
+
+#### 追加
+
+- `src/ui/components/PixelDolphin.tsx`: マスコットを絵文字🐬から SVG ドット絵（design/mascot.jsx 移植）へ。尾びれフラップ・bob/sway/tilt・約10秒毎のスピン・胸びれのフルアニメーション。`useReducedMotion` hook で JS アニメも prefers-reduced-motion に追従（NFR-4）
+- `src/ui/components/MascotCorner.tsx`: コーナーマスコット＋吹き出し（トップ/ウィザード/完了に配置、aria-hidden + pointer-events-none）
+- トップ: ドット背景テクスチャ・H1 マーカー強調・オフセット影 CTA・3 ステップ破線チップ・「generates →」ファイルスタンプ（final-variants.jsx 確定コピー採用）
+- ウィザード: 左パネル 440px 固定・セグメント分割進捗バー・ChoiceCard 押し込み演出・**モバイル sticky「次へ」フッター**・ESC 中断＋キーヒント
+- 完了画面: DONE バッジ（rotate + offset 影）・太枠ファイルカード・CTA 3 系統（DL / トップへ戻る / Web Share 対応時のみシェア）
+- E2E: キーボードのみ完走テスト（NFR-4 の deterministic 証明）・Escape 中断テスト
+
+#### 修正
+
+- i18n: NotFoundPage / Footer のハードコード日本語を locales 経由に（英語 UI での表示破綻を解消）
+- ブランドカラー: ErrorBanner の Tailwind デフォルト yellow/orange/red を wf-static-errors.jsx の暖色トークン（danger/danger-soft/orange、border-2 + border-l-8）へ、ApiKeyPage の green チェックを orange に（3 色構成遵守）
+- エラー時に下フォームを半透明 + pointer-events:none で無効化（FR-11）
+- Header/Footer の死にリンク（href="#"）を公開リポジトリ実 URL に。未実装ガイドリンクは Phase 5 まで非表示化
+- aria-label の英語ハードコードを i18n 化（ProgressBar/Header）、装飾要素は aria-hidden に統一
+- App.tsx: トップ復帰時に wizardPlan をリセット（前回プラン残存の修正）
+- 7 択質問でショートカットが欠落する問題を修正（SHORTCUTS A-F → A-H）
+
+#### 性能
+
+- PixelDolphin の身体モーションを React state（60fps setState）から `<g>` transform の直接更新に変更 — 毎フレームの再レンダリングを排除（ローカル Lighthouse mobile: observed FCP 279ms → 200ms、Performance 99 → 100）
+- フォント読込: Noto Sans JP 400/500/700 を追加（NFR-10 の 3 フォント構成へ）しつつ、未使用の Zen Kaku Gothic New 400 を削除して Google Fonts CSS を縮減
+- tailwind トークン拡張: `orange.hover`（hover 用）/`orange.deep`（影・破線用）の用途分離、オフセット影体系（offset-orange/ink 等）、danger 系
+
+#### テスト・検証
+
+- 単体 287 件 PASS / カバレッジ stmts 90.75 · lines 93.08（閾値超）/ E2E free-flow 8 件 PASS / spec-reviewer 要修正 0 件・Phase 1/2 退行なし
+- 新規テスト: PixelDolphin（fake timers + rAF で静止/停止/クリーンアップ）・MascotCorner・ChoiceCard・PlanCard・Header・Footer・ProgressBar・NotFoundPage
+
 ## v0.2.2 (2026-06-10)
 
 ### Light プラン増強（品質接地 + core-principles 追加 5→6）

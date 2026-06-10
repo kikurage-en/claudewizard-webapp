@@ -100,7 +100,9 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
 
   const [frame, setFrame] = useState(0)
   const [finUp, setFinUp] = useState(false)
-  const [t, setT] = useState(0)
+  // 身体モーションは React state にせず <g> の transform 属性を直接更新する
+  // （60fps の setState は再レンダリング負荷が大きく、実測で FCP/styleLayout を悪化させた）
+  const gRef = useRef<SVGGElement>(null)
   // インスタンス毎の位相オフセット（複数配置時にスピンが同期しないように）
   const spinOffsetRef = useRef(Math.random() * 10)
 
@@ -129,18 +131,41 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
     }
   }, [shouldAnimate])
 
-  // 身体モーション（呼吸ボブ + 揺れ + 傾き）の連続時間ティッカー
+  // 身体モーション（呼吸ボブ + 揺れ + 傾き + フルスピン）: rAF で <g> の transform を直接更新。
+  // React の再レンダリングを伴わないため毎フレームでもコストは setAttribute 1 回分のみ。
   useEffect(() => {
     if (!shouldAnimate) return
     let raf: number
     let start: number | undefined
+    const cx = 18 / 2
+    const cy = 18 / 2
+    const SPIN_PERIOD = 10 // スピン間隔（秒）
+    const SPIN_DUR = 0.9 // 1 回転にかける時間（秒）
+
     const loop = (now: number) => {
       if (start === undefined) start = now
-      setT((now - start) / 1000)
+      const t = (now - start) / 1000
+      const bob = Math.sin(t * 1.6) * 0.9 // ±0.9 px
+      const sway = Math.sin(t * 0.9 + 1.3) * 0.5 // ±0.5 px
+      const tilt = Math.sin(t * 1.6 - 0.6) * 3.0 // ±3 deg
+
+      // フルスピン: 約 10 秒に 1 回、~900ms で 360°（ease-in-out cubic）
+      const phase = (t + spinOffsetRef.current) % SPIN_PERIOD
+      let spin = 0
+      if (phase < SPIN_DUR) {
+        const p = phase / SPIN_DUR
+        spin = (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2) * 360
+      }
+
+      gRef.current?.setAttribute('transform', `translate(${sway} ${bob}) rotate(${tilt + spin} ${cx} ${cy})`)
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(raf)
+      // 停止時は中立ポーズへ戻す（reduced-motion 切替時に傾いたまま残らない）
+      gRef.current?.removeAttribute('transform')
+    }
   }, [shouldAnimate])
 
   // 胸びれトグル: 尾びれよりゆっくり・不規則。基本は down、時々短く up。
@@ -180,22 +205,6 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
   const cols = 18
   const rows = 18
 
-  // レイヤー化した身体モーション（スプライトのピクセル単位でクリスプに保つ）
-  const bob = shouldAnimate ? Math.sin(t * 1.6) * 0.9 : 0 // ±0.9 px
-  const sway = shouldAnimate ? Math.sin(t * 0.9 + 1.3) * 0.5 : 0 // ±0.5 px
-  const tilt = shouldAnimate ? Math.sin(t * 1.6 - 0.6) * 3.0 : 0 // ±3 deg
-
-  // フルスピン: 約 10 秒に 1 回、~900ms で 360° 回転（ease-in-out cubic）
-  const SPIN_PERIOD = 10
-  const SPIN_DUR = 0.9
-  const phase = shouldAnimate ? (t + spinOffsetRef.current) % SPIN_PERIOD : 0
-  let spin = 0
-  if (shouldAnimate && phase < SPIN_DUR) {
-    const p = phase / SPIN_DUR
-    const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2
-    spin = eased * 360
-  }
-
   const rects = []
   for (let y = 0; y < rows; y++) {
     const line = sprite[y]
@@ -211,9 +220,6 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
   const pad = 5
   const vbW = cols + pad * 2
   const vbH = rows + pad * 2
-  const cx = cols / 2
-  const cy = rows / 2
-  const transform = `translate(${sway} ${bob}) rotate(${tilt + spin} ${cx} ${cy})`
 
   return (
     <svg
@@ -225,7 +231,8 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
       aria-hidden="true"
       focusable="false"
     >
-      <g transform={transform}>{rects}</g>
+      {/* transform は rAF が直接管理（JSX で指定すると frame 再レンダリング毎に上書きされるため指定しない） */}
+      <g ref={gRef}>{rects}</g>
     </svg>
   )
 }
