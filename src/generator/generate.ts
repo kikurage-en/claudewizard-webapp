@@ -76,11 +76,11 @@ export async function generate(
   // Free 経路のみ到達（light は早期 return / plus は throw）。
   // Tech Stack 質問（stack）の回答から Tech Stack / Build & Test / Architecture を実値化する。
   // buildStackVars は Free 専用＝Light/Plus は parseAnswers のみで非到達（per-tier 非波及）。
-  // domain 適合（code/non-code 2 分岐）は Free では stack 軸を優先する（domainProfiles.ts）。
+  // domain 適合は code/non-code（stack 軸）× q1 分野（SKILL/CLAUDE の分野個性）の直交 2 軸（domainProfiles.ts）。
   const vars = {
     ...parseAnswers(answers, lang),
     ...buildStackVars(answers['stack'] ?? 'other-code', lang),
-    ...buildDomainVars(isCodeFree(answers['stack']), lang),
+    ...buildDomainVars(isCodeFree(answers['stack']), lang, answers['q1']),
   }
   const templates = await loadTemplates(lang)
   const manifest = getManifest(plan)

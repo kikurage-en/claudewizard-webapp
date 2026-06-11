@@ -41,7 +41,9 @@ export function TopPage({ lang, onSelectPlan }: Props) {
           <span>{t('hero.badge')}</span>
         </div>
 
-        <h1 className="font-display font-black text-4xl md:text-7xl text-ink leading-[1.15] tracking-tight whitespace-pre-line mb-6">
+        {/* モバイルは 28px（デザイン正: H1 モバイル 28-32px / 行高 1.25）。
+            36px だと ja 3 行目（11 全角字）が 375-390px 幅で途中折返しして崩れる */}
+        <h1 className="font-display font-black text-[28px] sm:text-4xl md:text-7xl text-ink leading-[1.25] sm:leading-[1.15] tracking-tight whitespace-pre-line mb-6">
           {titleBefore}
           {hIdx >= 0 && (
             <span

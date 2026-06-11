@@ -8,7 +8,7 @@ export const template = `# {{projectName}}
 
 ## 作業ルール
 
-{{workRules}}
+{{workRules}}{{domainWorkRules}}
 - MUST: 迷ったときは推測で埋めず、確認する
 
 判断の基本原則（Evidence First 等）は @.claude/rules/core-principles.md を参照。

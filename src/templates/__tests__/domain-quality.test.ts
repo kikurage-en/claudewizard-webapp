@@ -86,12 +86,120 @@ const FILLER_MARKERS = {
   en: ['assumes a conventional', 'Claude assumes'],
 }
 
+// 分野シグネチャ（per-surface）。単一マーカーでは起動条件//verify//review/Gotchas/CLAUDE 規律の
+// 実装漏れを面単位で検出できないため、5 サーフェスに個別マーカーを割り当て両方向で検証する。
+// 各マーカーは自分野の該当サーフェスのみに出現し、他分野文言・共有固定文と完全一致しない（設計時検算済み）。
+type DomainSignature = {
+  trigger: string // SKILL.md frontmatter 起動フレーズ
+  verify: string // SKILL.md /verify 分野観点
+  review: string // SKILL.md /review 分野説明
+  gotcha: string // SKILL.md よくある落とし穴
+  claudeRule: string // CLAUDE.md 作業ルール末尾の分野規律
+}
+const DOMAIN_SIGNATURES: Record<'ja' | 'en', Record<string, DomainSignature>> = {
+  ja: {
+    software: {
+      trigger: 'リファクタリング',
+      verify: 'テストの代替',
+      review: '回帰リスク',
+      gotcha: 'バージョン差異',
+      claudeRule: '公式ドキュメントで確認してから使う',
+    },
+    'data-research': {
+      trigger: '調査をまとめる',
+      verify: '再計算',
+      review: 'データの出所',
+      gotcha: 'フィルタ条件',
+      claudeRule: '取得日',
+    },
+    writing: {
+      trigger: '構成を考える',
+      verify: 'トーン・難易度',
+      review: '誤字脱字',
+      gotcha: '孫引き',
+      claudeRule: '推測は推測と明示',
+    },
+    sns: {
+      trigger: '投稿カレンダー',
+      verify: 'プラットフォーム規約',
+      review: '規約抵触',
+      gotcha: '予約投稿',
+      claudeRule: '断定形',
+    },
+    automation: {
+      trigger: '定型作業',
+      verify: '二重処理',
+      review: '冪等性',
+      gotcha: 'タイムゾーン',
+      claudeRule: '少数試行',
+    },
+    design: {
+      trigger: 'ロゴ案',
+      verify: '素材のライセンス',
+      review: 'ブランド整合',
+      gotcha: '改変可否',
+      claudeRule: '商用利用可否',
+    },
+  },
+  en: {
+    software: {
+      trigger: 'refactor',
+      verify: 'substitute for tests',
+      review: 'regression risk',
+      gotcha: 'version differences',
+      claudeRule: 'official docs before using',
+    },
+    'data-research': {
+      trigger: 'summarize research',
+      verify: 'recompute',
+      review: 'source of the data',
+      gotcha: 'filter conditions',
+      claudeRule: 'retrieval date',
+    },
+    writing: {
+      trigger: 'draft an article',
+      verify: 'tone and difficulty',
+      review: 'typos',
+      gotcha: 'secondhand quotes',
+      claudeRule: 'inferences as inferences',
+    },
+    sns: {
+      trigger: 'content calendar',
+      verify: 'platform rules',
+      review: 'policy violations',
+      gotcha: 'scheduled posts',
+      claudeRule: 'as established fact',
+    },
+    automation: {
+      trigger: 'routine task',
+      verify: 'double-processing',
+      review: 'idempotency',
+      gotcha: 'time zone',
+      claudeRule: 'small trial',
+    },
+    design: {
+      trigger: 'logo concepts',
+      verify: 'asset license',
+      review: 'brand consistency',
+      gotcha: 'modification rights',
+      claudeRule: 'commercial-use permission',
+    },
+  },
+}
+
+// Light 静的 5 rules は普遍（CLI 原則）— 分野コンテンツが漏出しないことを各分野 1 マーカーで検証する。
+// （Light 静的テンプレの固定文・CODE/NON_CODE 変数文言と衝突しないマーカーのみ選定）
+const LIGHT_LEAK_MARKERS: Record<'ja' | 'en', string[]> = {
+  ja: ['テストの代替', 'データの出所', '孫引き', 'プラットフォーム規約', '二重処理', '素材のライセンス'],
+  en: ['substitute for tests', 'source of the data', 'secondhand quotes', 'platform rules', 'double-processing', 'asset license'],
+}
+
 function renderFree(domain: string, stack: string, lang: 'ja' | 'en'): Record<string, string> {
   const answers = { q1: domain, q2: 'qa-proj', stack }
   const vars = {
     ...parseAnswers(answers, lang),
     ...buildStackVars(stack, lang),
-    ...buildDomainVars(isCodeFree(answers['stack']), lang),
+    ...buildDomainVars(isCodeFree(answers['stack']), lang, answers['q1']),
   }
   const templates = lang === 'ja' ? JA_FREE : EN_FREE
   const out: Record<string, string> = {}
@@ -165,7 +273,6 @@ describe.each(['ja', 'en'] as const)('Free 生成物の品質（%s・7 domain ×
           // code 系: 現行のコード向け文言が保たれている（positive）
           expect(claudeMd).toContain(m.claudeWorkRule)
           expect(securityMd).toContain(m.securityDependency)
-          expect(skillMd).toContain(m.skillReview)
           // /init 育成フローの案内: CLAUDE.md は HTML コメント（context 非消費）、README は節
           expect(claudeMd).toContain('<!--')
           expect(claudeMd).toContain('/init')
@@ -175,10 +282,35 @@ describe.each(['ja', 'en'] as const)('Free 生成物の品質（%s・7 domain ×
           expect(claudeMd).not.toContain(m.claudeWorkRule)
           expect(securityMd).not.toContain(m.securityDependency)
           expect(securityMd).not.toContain(m.securityInjection)
-          expect(skillMd).not.toContain(m.skillReview)
           // /init はコード分析ツールのため非コード分野には案内しない
           expect(claudeMd).not.toContain('/init')
           expect(readmeMd).not.toContain('/init')
+        }
+
+        // 分野シグネチャの両方向検証（per-surface）。
+        // 自分野: trigger//verify//review/Gotchas が SKILL.md、分野規律が CLAUDE.md に存在。
+        // 他分野: 全 5 マーカーが CLAUDE.md + SKILL.md に不在（other は全分野マーカー不在）。
+        const sig = DOMAIN_SIGNATURES[lang][domain]
+        const combined = claudeMd + '\n' + skillMd
+        if (sig) {
+          expect(skillMd, `${label} 起動フレーズ欠落`).toContain(sig.trigger)
+          expect(skillMd, `${label} /verify 分野観点欠落`).toContain(sig.verify)
+          expect(skillMd, `${label} /review 分野説明欠落`).toContain(sig.review)
+          expect(skillMd, `${label} Gotchas 欠落`).toContain(sig.gotcha)
+          expect(claudeMd, `${label} CLAUDE.md 分野規律欠落`).toContain(sig.claudeRule)
+        } else {
+          // other: reviewDescription は従来の isCode 2-way へフォールバック
+          if (expectCode) {
+            expect(skillMd, `${label} other フォールバック(review)`).toContain(m.skillReview)
+          } else {
+            expect(skillMd, `${label} other フォールバック(review)`).not.toContain(m.skillReview)
+          }
+        }
+        for (const [otherDomain, otherSig] of Object.entries(DOMAIN_SIGNATURES[lang])) {
+          if (otherDomain === domain) continue
+          for (const [surface, marker] of Object.entries(otherSig)) {
+            expect(combined, `${label} 他分野(${otherDomain}/${surface})マーカー漏出: ${marker}`).not.toContain(marker)
+          }
         }
       })
     }
@@ -205,6 +337,13 @@ describe.each(['ja', 'en'] as const)('Light 静的テンプレの品質（%s・7
         } else {
           expect(securityMd).not.toContain(m.securityDependency)
           expect(securityMd).not.toContain(m.securityInjection)
+        }
+
+        // 分野コンテンツの Light 漏出不在: Light 静的 5 rules は普遍（CLI 原則）。
+        // q1 によらず Free の分野マーカーが Light 静的出力に出ないことを全組合せで証明する。
+        const allContent = Object.values(files).join('\n')
+        for (const marker of LIGHT_LEAK_MARKERS[lang]) {
+          expect(allContent, `${label} Light 静的への分野マーカー漏出: ${marker}`).not.toContain(marker)
         }
       })
     }

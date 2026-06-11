@@ -8,7 +8,7 @@ Claude Code configuration for this {{domain}} project.
 
 ## Working Rules
 
-{{workRules}}
+{{workRules}}{{domainWorkRules}}
 - MUST: When unsure, ask instead of guessing
 
 See @.claude/rules/core-principles.md for the core decision principles (Evidence First, etc.).

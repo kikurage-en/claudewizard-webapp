@@ -13,6 +13,22 @@
     min-height: 100vh;
   }
 
+  /* モバイル横はみ出しのグローバルガード。clip はスクロールコンテナを作らないため
+     sticky（ヘッダー top / ウィザード CTA bottom）を壊さない（e2e/mobile-overflow.spec.ts で検証）。
+     真因要素の検出はガードに依存しない同 spec の要素検査が担う。 */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  /* overflow-x: clip 非対応の旧ブラウザ（iOS 15 以下）向け次善策。
+     body には当てない（html だけなら sticky への影響が最小） */
+  @supports not (overflow-x: clip) {
+    html {
+      overflow-x: hidden;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;

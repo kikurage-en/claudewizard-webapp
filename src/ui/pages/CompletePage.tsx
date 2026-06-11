@@ -136,7 +136,7 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
                 ) : (
                   <span className="text-ink-muted font-black text-base" aria-hidden="true">·</span>
                 )}
-                <span className="font-mono text-[13px] font-bold text-ink">{entry.zipPath}</span>
+                <span className="font-mono text-[13px] font-bold text-ink break-all">{entry.zipPath}</span>
               </li>
             ))}
           </ul>

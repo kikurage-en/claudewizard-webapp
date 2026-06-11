@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, act } from '@testing-library/react'
-import { PixelDolphin } from '../components/PixelDolphin'
+import {
+  PixelDolphin,
+  DOLPHIN_GRID,
+  DOLPHIN_VIEWBOX_PAD,
+  DOLPHIN_BOB_AMPLITUDE,
+  DOLPHIN_SWAY_AMPLITUDE,
+} from '../components/PixelDolphin'
 
 // reduced-motion の有無を切り替える（test-setup の既定は reduce=ON）
 function setMatchMedia(reducedMotion: boolean) {
@@ -75,6 +81,24 @@ describe('PixelDolphin', () => {
     expect(vi.getTimerCount()).toBeGreaterThan(0)
     unmount()
     expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('SVG が overflow: hidden で描画される（モバイル横はみ出し対策）', () => {
+    // visible だと iOS Safari が SVG 描画域を文書スクロール領域に算入し横はみ出しの一因になる
+    const { container } = render(<PixelDolphin size={48} />)
+    expect(container.querySelector('svg')!.style.overflow).toBe('hidden')
+  })
+
+  it('全アニメーション極値で viewBox からはみ出さない（overflow: hidden のクリップ安全性）', () => {
+    // 回転（tilt/spin）はスプライト中心基準なので最大到達半径は半対角 (GRID/2)·√2。
+    // 並進（bob/sway）は直交軸のため合成は √(bob²+sway²)。
+    // これが viewBox の中心からの許容半径 GRID/2 + PAD を超えると、
+    // overflow: hidden 化によりスピン中のピクセルが視覚的に切れてしまう。
+    // 振幅や pad を変更する際はこの不変条件を保つこと。
+    const halfDiagonal = (DOLPHIN_GRID / 2) * Math.SQRT2
+    const translateMax = Math.hypot(DOLPHIN_BOB_AMPLITUDE, DOLPHIN_SWAY_AMPLITUDE)
+    const allowedRadius = DOLPHIN_GRID / 2 + DOLPHIN_VIEWBOX_PAD
+    expect(halfDiagonal + translateMax).toBeLessThanOrEqual(allowedRadius)
   })
 
   it('複数インスタンスが同時に描画できる', () => {

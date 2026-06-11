@@ -31,7 +31,9 @@ export function TextInput({ id, label, value, placeholder, onChange, onEnter, is
         onKeyDown={handleKeyDown}
         aria-invalid={isValid === false || undefined}
         className={[
-          'w-full px-4 py-3 rounded-btn border-[1.5px] font-mono text-sm bg-white text-ink',
+          // モバイルは 16px 必須: font-size < 16px の入力欄は iOS Safari がフォーカス時に
+          // ページを自動ズームし、横はみ出しの原因になる
+          'w-full px-4 py-3 rounded-btn border-[1.5px] font-mono text-base md:text-sm bg-white text-ink',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-orange transition-colors',
           isValid === false ? 'border-danger' : 'border-line-faint focus:border-orange',
         ].join(' ')}

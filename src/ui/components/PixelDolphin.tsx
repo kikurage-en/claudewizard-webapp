@@ -6,6 +6,15 @@ import { useReducedMotion } from '../hooks/useReducedMotion'
 // 18×18 グリッド。尾びれフレーム（A ↔ B）に胸びれオーバーレイ（down / up）を
 // 描画時に合成することで、尾びれと胸びれの動きを独立させている。
 
+// スプライト寸法・アニメーション振幅・viewBox 余白。
+// SVG は overflow: hidden（モバイル横はみ出し対策）のため、全アニメーション極値で
+// viewBox からはみ出さないこと（クリップ安全性）が前提条件。
+// 不変条件「半対角 + √(bob²+sway²) ≤ GRID/2 + PAD」を __tests__/PixelDolphin.test.tsx で機械検証している。
+export const DOLPHIN_GRID = 18
+export const DOLPHIN_VIEWBOX_PAD = 5
+export const DOLPHIN_BOB_AMPLITUDE = 0.9
+export const DOLPHIN_SWAY_AMPLITUDE = 0.5
+
 const DOLPHIN_PALETTE: Record<string, string> = {
   O: '#D97C5F', // 本体
   D: '#D97C5F', // 旧アウトライン色（本体色に統合済み）
@@ -137,16 +146,16 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
     if (!shouldAnimate) return
     let raf: number
     let start: number | undefined
-    const cx = 18 / 2
-    const cy = 18 / 2
+    const cx = DOLPHIN_GRID / 2
+    const cy = DOLPHIN_GRID / 2
     const SPIN_PERIOD = 10 // スピン間隔（秒）
     const SPIN_DUR = 0.9 // 1 回転にかける時間（秒）
 
     const loop = (now: number) => {
       if (start === undefined) start = now
       const t = (now - start) / 1000
-      const bob = Math.sin(t * 1.6) * 0.9 // ±0.9 px
-      const sway = Math.sin(t * 0.9 + 1.3) * 0.5 // ±0.5 px
+      const bob = Math.sin(t * 1.6) * DOLPHIN_BOB_AMPLITUDE
+      const sway = Math.sin(t * 0.9 + 1.3) * DOLPHIN_SWAY_AMPLITUDE
       const tilt = Math.sin(t * 1.6 - 0.6) * 3.0 // ±3 deg
 
       // フルスピン: 約 10 秒に 1 回、~900ms で 360°（ease-in-out cubic）
@@ -202,8 +211,8 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
 
   const baseSprite = frame === 0 ? DOLPHIN_FRAME_A : DOLPHIN_FRAME_B
   const sprite = applyOverlay(baseSprite, finUp ? PECTORAL_UP : PECTORAL_DOWN)
-  const cols = 18
-  const rows = 18
+  const cols = DOLPHIN_GRID
+  const rows = DOLPHIN_GRID
 
   const rects = []
   for (let y = 0; y < rows; y++) {
@@ -216,8 +225,8 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
   }
 
   // ボブ/傾き/スピンでクリップしないよう viewBox に余白を持たせる
-  // （18×18 を回転すると ~26×26。pad=5 で 28×28 の安全マージン）
-  const pad = 5
+  // （最大到達半径 = 半対角 9√2 + 並進 √(0.9²+0.5²) ≈ 13.76 ≤ 中心半径 9 + pad 5 = 14）
+  const pad = DOLPHIN_VIEWBOX_PAD
   const vbW = cols + pad * 2
   const vbH = rows + pad * 2
 
@@ -227,7 +236,9 @@ export function PixelDolphin({ size = 120, animate = true, className, style }: P
       height={(size * vbH) / vbW}
       viewBox={`${-pad} ${-pad} ${vbW} ${vbH}`}
       className={className}
-      style={{ shapeRendering: 'crispEdges', display: 'block', overflow: 'visible', ...style }}
+      // overflow は hidden 必須: visible だと iOS Safari が SVG 描画域を文書のスクロール領域に
+      // 算入し、横はみ出しの一因になる。クリップ安全性は viewBox の pad で担保（上記コメント参照）
+      style={{ shapeRendering: 'crispEdges', display: 'block', overflow: 'hidden', ...style }}
       aria-hidden="true"
       focusable="false"
     >

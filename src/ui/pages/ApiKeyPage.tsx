@@ -60,7 +60,8 @@ export function ApiKeyPage({ plan, onContinue, onCancel }: Props) {
                 placeholder={t('api_key.placeholder')}
                 autoComplete="off"
                 spellCheck={false}
-                className="w-full font-mono text-sm bg-white border border-line-faint rounded-lg px-4 py-3 pr-20 focus:outline-none focus:border-orange focus:ring-1 focus:ring-orange"
+                // モバイルは 16px 必須: font-size < 16px は iOS Safari のフォーカス自動ズームを発火させる
+                className="w-full font-mono text-base md:text-sm bg-white border border-line-faint rounded-lg px-4 py-3 pr-20 focus:outline-none focus:border-orange focus:ring-1 focus:ring-orange"
                 aria-label={t('api_key.label')}
                 aria-describedby="api-key-note"
               />

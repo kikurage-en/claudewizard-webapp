@@ -3,7 +3,7 @@ name: main
 description: |
   Main skill for {{projectName}}. Basic flow for working on {{domain}} tasks with Claude Code.
 
-  [Trigger] /main, "start working on {{domain}}", etc.
+  [Trigger] /main, "start working on {{domain}}"{{skillTriggers}}
 ---
 
 # {{projectName}} Main Skill
@@ -20,7 +20,7 @@ The basic skill for using Claude Code on this {{domain}} project.
 Basic helper commands available in this project:
 
 ### /verify — Verify implementations and deliverables
-Review what was produced and check quality and consistency.
+Review what was produced and check quality and consistency.{{verifyFocus}}
 
 ### /improve — Improvement suggestions
 Analyze the current state and present prioritized improvements.
@@ -34,7 +34,7 @@ Analyze the current state and present prioritized improvements.
 2. Implement with the minimum change
 3. Verify with /verify, and refine with /improve if needed
 
-## Configuration Files
+{{skillGotchas}}## Configuration Files
 
 | File | Role |
 |------|------|

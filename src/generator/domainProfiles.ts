@@ -228,10 +228,229 @@ const NON_CODE: Record<'ja' | 'en', DomainVars> = {
   },
 }
 
+// 分野コンテンツ（q1 7-way・Free 専用）。接地元:
+// - CLI 版 generation.md の分野別重点テーブル（コンテンツ=事実確認・引用検証 / 調査研究=データ検証・
+//   出典確認 / 自動化=動作確認・影響範囲 / 開発=テスト要件・レビュー基準）
+// - 公式 skills repo の設計基準（description に起動キーワード=undertrigger 対策、Gotchas が最高価値）
+// - design は CLI に対応分野がないため公式 skills repo（brand-guidelines / canvas-design）に接地
+// rules 4 ファイルは普遍（CLI 原則）— 分野個性は SKILL.md と CLAUDE.md 作業ルールのみに出す。
+// 分野軸は code/non-code 軸と直交（例: writing×ts は code 系作業ルール + writing 分野個性）。
+type DomainContentVars = {
+  skillTriggers: string // SKILL frontmatter 起動条件の分野フレーズ（読点・「等」込み）
+  verifyFocus: string // SKILL /verify の分野観点（先頭改行込み）
+  reviewDescription: string // SKILL /review の分野説明（other は isCode 2-way へフォールバック）
+  skillGotchas: string // SKILL「よくある落とし穴」節（見出しごと。空なら節なし）
+  domainWorkRules: string // CLAUDE.md 作業ルール末尾の分野規律（先頭改行込み・≤2 行）
+}
+
+const DOMAIN_CONTENT: Record<string, Record<'ja' | 'en', DomainContentVars>> = {
+  software: {
+    ja: {
+      skillTriggers: '、「実装を始める」「テストを書く」「リファクタリングする」等',
+      verifyFocus:
+        '\n特に: テストが意図（なぜその挙動が重要か）を検証しているか。型チェック通過をテストの代替にしない。',
+      reviewDescription: '変更差分を確認し、テスト意図・回帰リスク・セキュリティ観点でコメントする。',
+      skillGotchas: [
+        '## よくある落とし穴',
+        '',
+        '- 型が合っていても挙動は壊れうる。挙動はテストでしか証明されない',
+        '- ライブラリの API は記憶でなく公式ドキュメントで確認する（バージョン差異で壊れる）',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: 外部ライブラリ・API の仕様は公式ドキュメントで確認してから使う',
+    },
+    en: {
+      skillTriggers: ', "start implementing", "write tests", "refactor", etc.',
+      verifyFocus:
+        '\nFocus: do tests verify WHY the behavior matters? Passing type checks is no substitute for tests.',
+      reviewDescription: 'Review the diff for test intent, regression risk, and security.',
+      skillGotchas: [
+        '## Common Pitfalls',
+        '',
+        '- Passing types do not prove behavior; behavior is only proven by tests',
+        '- Check library APIs in the official docs, not from memory (they break across version differences)',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: Check external library/API behavior in the official docs before using it',
+    },
+  },
+  'data-research': {
+    ja: {
+      skillTriggers: '、「データを集計する」「調査をまとめる」「分析する」等',
+      verifyFocus: '\n特に: 数値が元データから再計算で一致するか。事実と推測が区別されているか。',
+      reviewDescription: '集計・分析結果を確認し、データの出所・再現性・解釈の妥当性をコメントする。',
+      skillGotchas: [
+        '## よくある落とし穴',
+        '',
+        '- 出所の確認できないデータを分析の前提にしない（後工程がすべて無効になる）',
+        '- 集計の途中でフィルタ条件を変えたら、それ以前の数値はすべて出し直す',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: 数値・引用には出所（URL・ファイル名・取得日）を明記する',
+    },
+    en: {
+      skillTriggers: ', "aggregate data", "summarize research", "analyze", etc.',
+      verifyFocus: '\nFocus: do figures recompute from the raw data? Are facts and inferences kept separate?',
+      reviewDescription:
+        'Review results for the source of the data, reproducibility, and soundness of interpretation.',
+      skillGotchas: [
+        '## Common Pitfalls',
+        '',
+        '- Never build analysis on data whose origin cannot be verified (everything downstream becomes invalid)',
+        '- If you change filter conditions mid-aggregation, redo all earlier figures',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: State the source (URL, file name, retrieval date) for every figure and quote',
+    },
+  },
+  writing: {
+    ja: {
+      skillTriggers: '、「記事を書きたい」「原稿をレビューする」「構成を考える」等',
+      verifyFocus: '\n特に: 想定読者に対してトーン・難易度が一致しているか。引用・事実の出典が確認できるか。',
+      reviewDescription: '原稿を確認し、想定読者との整合・事実誤認・誤字脱字をコメントする。',
+      skillGotchas: [
+        '## よくある落とし穴',
+        '',
+        '- 着手前に想定読者と目的を 1 行で確認する（途中変更は全体の書き直しになる）',
+        '- 引用は原文に当たって確認する（孫引きは誤りが伝播する）',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: 事実の記述は出典を確認し、推測は推測と明示する',
+    },
+    en: {
+      skillTriggers: ', "draft an article", "review a manuscript", "plan an outline", etc.',
+      verifyFocus:
+        '\nFocus: do tone and difficulty match the target audience? Are quotes and facts traceable to sources?',
+      reviewDescription: 'Review the manuscript for audience fit, factual errors, and typos.',
+      skillGotchas: [
+        '## Common Pitfalls',
+        '',
+        '- Confirm the target audience and purpose in one line before starting (changing them mid-draft means a full rewrite)',
+        '- Verify quotes against the original source (secondhand quotes propagate errors)',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: Verify sources for factual statements, and state inferences as inferences',
+    },
+  },
+  sns: {
+    ja: {
+      skillTriggers: '、「投稿文を作る」「投稿カレンダーを作る」「リプライ案を考える」等',
+      verifyFocus: '\n特に: プラットフォーム規約・文字数制限に収まっているか。投稿前の事実確認が済んでいるか。',
+      reviewDescription: '投稿文面を確認し、事実誤認・規約抵触・トーン不一致をコメントする。',
+      skillGotchas: [
+        '## よくある落とし穴',
+        '',
+        '- プラットフォームごとに文字数・画像規格・リンク仕様が違う（同じ文面の使い回しは崩れる）',
+        '- 予約投稿は宛先アカウントと公開範囲を設定時に再確認する',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST NOT: 未確認の情報を断定形で投稿文にしない',
+    },
+    en: {
+      skillTriggers: ', "draft a post", "build a content calendar", "draft replies", etc.',
+      verifyFocus: '\nFocus: within platform rules and character limits? Facts checked before posting?',
+      reviewDescription: 'Review post copy for factual errors, policy violations, and tone mismatch.',
+      skillGotchas: [
+        '## Common Pitfalls',
+        '',
+        '- Character limits, image specs, and link behavior differ per platform (reusing the same copy breaks)',
+        '- For scheduled posts, re-check the destination account and visibility at scheduling time',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST NOT: State unverified information as established fact in post copy',
+    },
+  },
+  automation: {
+    ja: {
+      skillTriggers: '、「定型作業を自動化する」「スクリプトを組む」「バッチ処理を作る」等',
+      verifyFocus:
+        '\n特に: dry-run で影響範囲を確認したか。途中失敗時に安全に停止し、再実行で二重処理にならないか。',
+      reviewDescription: '自動化フローを確認し、影響範囲・失敗時挙動・冪等性をコメントする。',
+      skillGotchas: [
+        '## よくある落とし穴',
+        '',
+        '- 本実行の前に必ず dry-run（または対象 1 件の試行）で影響範囲を確認する',
+        '- 日時を扱う処理はタイムゾーンを明示する（実行環境で既定値が変わる）',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: 一括処理は dry-run か少数試行で影響範囲を確認してから本実行する',
+    },
+    en: {
+      skillTriggers: ', "automate a routine task", "write a script", "set up a batch job", etc.',
+      verifyFocus:
+        '\nFocus: was the scope verified with a dry-run? Does it stop safely on failure and re-run without double-processing?',
+      reviewDescription: 'Review the automation for scope of impact, failure behavior, and idempotency.',
+      skillGotchas: [
+        '## Common Pitfalls',
+        '',
+        '- Always verify the scope with a dry-run (or a trial on a single item) before the real run',
+        '- Make time zones explicit in anything date/time-related (defaults vary by environment)',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules:
+        '\n- MUST: Verify the scope of bulk operations with a dry-run or small trial before the real run',
+    },
+  },
+  design: {
+    ja: {
+      skillTriggers: '、「バナーを作る」「スライドをデザインする」「ロゴ案を出す」等',
+      verifyFocus:
+        '\n特に: ブランドのカラー・フォント・トーンと整合しているか。素材のライセンスと出力設定（解像度・形式）が用途に合うか。',
+      reviewDescription: '制作物を確認し、ブランド整合・素材ライセンス・出力設定をコメントする。',
+      skillGotchas: [
+        '## よくある落とし穴',
+        '',
+        '- 素材は使用前にライセンスを確認する（クレジット要否・改変可否まで）',
+        '- 書き出し設定（解像度・色空間・形式）は掲載先の要求仕様から逆算する',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: 外部素材は商用利用可否とライセンスを確認してから使う',
+    },
+    en: {
+      skillTriggers: ', "create a banner", "design slides", "sketch logo concepts", etc.',
+      verifyFocus:
+        '\nFocus: consistent with brand colors, fonts, and tone? Do the asset license and export settings (resolution, format) fit the use?',
+      reviewDescription: 'Review the deliverable for brand consistency, asset licensing, and export settings.',
+      skillGotchas: [
+        '## Common Pitfalls',
+        '',
+        '- Check the license before using any external material (including credit and modification rights)',
+        '- Derive export settings (resolution, color space, format) from the destination\'s requirements',
+        '',
+        '',
+      ].join('\n'),
+      domainWorkRules: '\n- MUST: Confirm commercial-use permission and license terms before using external assets',
+    },
+  },
+}
+
+// other・未知値の分野フォールバック（分野個性なし。reviewDescription は base の isCode 2-way 値を使う）
+const EMPTY_DOMAIN_CONTENT: Record<'ja' | 'en', Omit<DomainContentVars, 'reviewDescription'>> = {
+  ja: { skillTriggers: '等', verifyFocus: '', skillGotchas: '', domainWorkRules: '' },
+  en: { skillTriggers: ', etc.', verifyFocus: '', skillGotchas: '', domainWorkRules: '' },
+}
+
 /**
- * code / non-code グループに応じたセクション単位の変数を返す。
- * Free は isCodeFree(stack)、Light は isCodeLight(answers) で判定した結果を渡す。
+ * code / non-code グループ + q1 分野に応じたセクション単位の変数を返す。
+ * Free は isCodeFree(stack) と q1、Light は isCodeLight(answers) で判定した結果を渡す。
+ * domain 省略時（Light 静的 rules = 普遍）は分野個性なしのフォールバック。
  */
-export function buildDomainVars(isCode: boolean, lang: 'ja' | 'en'): TemplateVars {
-  return { ...(isCode ? CODE : NON_CODE)[lang] }
+export function buildDomainVars(isCode: boolean, lang: 'ja' | 'en', domain: string = 'other'): TemplateVars {
+  const base = (isCode ? CODE : NON_CODE)[lang]
+  const content = DOMAIN_CONTENT[domain]?.[lang]
+  if (!content) {
+    return { ...base, ...EMPTY_DOMAIN_CONTENT[lang] }
+  }
+  return { ...base, ...content }
 }

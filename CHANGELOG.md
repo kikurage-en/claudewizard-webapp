@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## v0.6.1 (2026-06-11)
+
+### モバイル実機（iPhone Safari）の横はみ出し・レイアウト崩れ修正
+
+実機報告（ページ幅はみ出し + 崩れ散見）に対応。e2e にモバイルビューポートが皆無で実機まで検出できない構造だったため、WebKit 390px/375px の横はみ出し回帰テストを先行追加（TDD・修正前 RED 7 件）してから修正。
+
+#### 修正
+
+- TopPage H1: モバイル 36px → 28px（デザイン正の「H1 モバイル 28-32px / 行高 1.25」に接地）。ja 3 行目「ちゃんと書けてますか？」（11 全角字）が 375-390px 幅で途中折返しして 4 行になる崩れを解消
+- 入力欄（TextInput / ApiKeyPage）: モバイル 14px → 16px（`text-base md:text-sm`）。font-size < 16px の入力欄は iOS Safari 実機がフォーカス時にページを自動ズームし横はみ出しの原因になる（エミュレーション非再現の実機固有挙動 = 報告症状の最有力原因）
+- グローバルガード: html/body に `overflow-x: clip`（スクロールコンテナを作らず sticky 非破壊。iOS15 以下は @supports フォールバック）
+- PixelDolphin: SVG `overflow: visible` → `hidden`（iOS Safari は SVG 描画域をスクロール領域に算入しうる）。クリップ安全性の不変条件「半対角 + √(bob²+sway²) ≤ GRID/2 + pad」を定数 export + 単体テストで機械検証
+- 折返し保険: CompletePage ファイルパスに `break-all`、Terms/Privacy 本文に `break-words`
+
+#### テスト・検証
+
+- e2e/mobile-overflow.spec.ts 新規（iPhone 12=390px / iPhone 11 Pro=375px の 2 プロジェクト）: 全 7 ページ + ウィザード遷移アニメ中を検証。判定は overflow-x ガードに依存しない要素検査 2 種（border-box 掃引 + overflow-x:visible 要素の内容あふれ）+ H1 実レンダリング行数 + 入力欄 font-size ≥ 16px + sticky CTA 可視。修正後 16 件全 PASS
+- 単体 471 件 PASS（PixelDolphin 不変条件 2 件追加）/ typecheck PASS / free-flow E2E PASS
+- 既知の別件: free-flow のキーボード系 2 テストがローカル一括実行時のみフレーク（ベースラインでも同一再現 = 本変更と無関係。CI は workers=1 で green）
+- CI: e2e.yml のブラウザインストールに webkit を追加
+- wizard-fade-in の `translateX(8px)` は当初修正候補だったが、rAF サンプリング実測で main の `p-6` に吸収されはみ出さないことを確認し据え置き（回帰は遷移中サンプリングが恒久ガード）
+
+## v0.6.0 (2026-06-11)
+
+### Free の 7 分野コンテンツ差別化（SKILL.md + CLAUDE.md 作業ルール）
+
+ユーザー指摘「Free でどの選択肢を選んでも skills・rules の差が感じにくい」に対応。q1 の 7 分野（software / data-research / writing / sns / automation / design / other）を SKILL.md と CLAUDE.md に効かせる。接地元 = CLI 版の分野別重点テーブル（コンテンツ=事実確認・引用検証 / 調査研究=データ検証・出典確認 / 自動化=動作確認・影響範囲 / 開発=テスト要件・レビュー基準）+ 公式 skills repo の設計基準（起動キーワード=undertrigger 対策・Gotchas）。design は CLI 非対応のため公式 skills repo（brand-guidelines / canvas-design）に接地。**rules 4 ファイルは普遍維持**（CLI 原則: security-guidelines は分野分岐しない。ユーザー確認済み）。
+
+#### 修正
+
+- `domainProfiles`: DOMAIN_CONTENT（6 分野 × ja/en × 5 サーフェス）を追加。`buildDomainVars` に第 3 引数 domain（省略時 'other' = 分野個性なしフォールバック）。分野軸は code/non-code 軸と直交（例: writing×ts は code 系作業ルール + writing 分野個性）
+- SKILL.md テンプレ: frontmatter 起動条件に分野フレーズ（`{{skillTriggers}}`）、/verify に分野観点（`{{verifyFocus}}`）、/review 説明の分野化（`{{reviewDescription}}` を分野 keyed に・other は isCode 2-way へフォールバック）、「よくある落とし穴」節（`{{skillGotchas}}`・2 項目）を追加
+- CLAUDE.md テンプレ: 作業ルール末尾に分野規律 ≤2 行（`{{domainWorkRules}}`。例: sns「未確認の情報を断定形で投稿文にしない」、automation「一括処理は dry-run か少数試行で確認してから本実行」）
+- `lightGenerator` は**無変更**（domain デフォルト引数で Light 静的 5 rules の出力不変を構造的に保証。Light の CLAUDE/SKILL/README は API 生成で従来どおり回答適応）
+
+#### テスト・検証（Codex adversarial review 3 件の BLOCK 反映）
+
+- domain-quality: per-surface 分野シグネチャ（trigger//verify//review/Gotchas=SKILL.md、分野規律=CLAUDE.md の 5 マーカー × 6 分野 × ja/en）を両方向検証（自分野に存在・他分野に不在・other は全不在）。単一マーカー方式は 4 面の実装漏れを検出できないため不採用（BLOCK 指摘 3）。CLAUDE.md 用マーカーを SKILL 用と分離（BLOCK 指摘 1）。Light 全組合せに分野マーカー漏出不在 assert を追加 + Light 静的テンプレが reviewDescription・新設 4 変数を参照しないことを grep で機械確認（BLOCK 指摘 2）
+- 全 469 件 PASS / typecheck PASS / coverage 91.21・85.1・95.83・93.51（閾値超）。マーカーと共有固定文の衝突は設計時検算 + grep（claude_md/skill_md 固定部に 0 出現）で確認
+- spec 改訂: requirements（Free 出力仕様に分野差別化を明記・Light 静的への非適用を明記）/ 元要件 §3.3（分野回答の昇格注記）/ generator-domain（接地表に分野コンテンツ行を追加）
+- Light prompt 無変更のため `.enc` 再暗号化・実 API E2E 再実行は不要（USER-GATED 操作なし）
+
 ## v0.5.0 (2026-06-11)
 
 ### 生成 CLAUDE.md の「全行が効く」化 + /init 育成フローの明示的前提化
