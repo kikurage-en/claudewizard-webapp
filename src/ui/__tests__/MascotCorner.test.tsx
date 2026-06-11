@@ -10,6 +10,13 @@ describe('MascotCorner', () => {
     expect(corner.className).toContain('pointer-events-none')
   })
 
+  it('ビューポート右下に固定配置される（スクロール追従 = fixed。absolute では長いページで見切れる）', () => {
+    render(<MascotCorner text="はじめましょう！" />)
+    const corner = screen.getByTestId('mascot-corner')
+    expect(corner.className).toContain('fixed')
+    expect(corner.className).not.toContain('absolute')
+  })
+
   it('吹き出しテキストとイルカが表示される', () => {
     const { container } = render(<MascotCorner text="2問目、あと4問です！" />)
     expect(screen.getByText('2問目、あと4問です！')).toBeInTheDocument()

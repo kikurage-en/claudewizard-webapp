@@ -71,17 +71,17 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
   }
 
   return (
-    <main className="relative min-h-screen bg-cream flex flex-col items-center px-6 py-12 md:py-16">
+    <main className="relative min-h-screen bg-cream flex flex-col items-center px-6 py-6 md:py-8">
       <MascotCorner text={t('result.mascot_bubble')} size={88} />
       <div className="max-w-lg w-full text-center">
         {/* 全問完了の視覚化ドット */}
-        <div className="flex items-center justify-center gap-1.5 mb-6" aria-hidden="true">
+        <div className="flex items-center justify-center gap-1.5 mb-4" aria-hidden="true">
           {Array.from({ length: questionCount }, (_, i) => (
             <span key={i} data-testid="complete-dot" className="w-[7px] h-[7px] rounded-full bg-orange" />
           ))}
         </div>
 
-        <Mascot size="lg" className="mb-6" />
+        <Mascot size="lg" className="mb-4" />
 
         <span
           data-testid="done-badge"
@@ -101,7 +101,7 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
         <p className="text-ink-muted mb-2">
           {generated ? t('result.subtitle') : t('result.ready_subtitle')}
         </p>
-        <p className="text-sm text-ink-muted mb-8">{t('result.description')}</p>
+        <p className="text-sm text-ink-muted mb-6">{t('result.description')}</p>
 
         {errorCode && (
           <div className="mb-6 text-left">
@@ -114,7 +114,7 @@ export function CompletePage({ lang, plan, answers, onTryAgain }: Props) {
         )}
 
         {/* 生成ファイルカード（border 2px ink + 厚いオフセット影） */}
-        <div className="bg-white border-2 border-ink rounded-[16px] shadow-offset-ink p-5 mb-8 text-left">
+        <div className="bg-white border-2 border-ink rounded-[16px] shadow-offset-ink p-5 mb-6 text-left">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-3">
             {generated
               ? t('result.files_caption', { count: manifest.length })

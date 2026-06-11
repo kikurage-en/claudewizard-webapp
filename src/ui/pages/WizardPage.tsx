@@ -28,6 +28,11 @@ export function WizardPage({ onComplete, onCancel }: Props) {
   const question = questions[state.currentIndex]
   const currentAnswer = state.answers[question.id] ?? ''
 
+  // 質問が変わったら最上部へ（モバイルで前の質問のスクロール位置を引き継がない）
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [question.id])
+
   const canProceed = (): boolean => {
     if (question.type === 'text') {
       const q = question as TextQuestion
@@ -112,8 +117,9 @@ export function WizardPage({ onComplete, onCancel }: Props) {
           <ProgressBar current={state.currentIndex + 1} total={total} />
         </div>
 
+        {/* ヒントは進捗バー直下（mt-auto で左下に離すと視線が泳ぐため上部に寄せる） */}
         {question.tipKey && (
-          <div className="relative bg-line-strong rounded-card-sm p-4 mt-auto">
+          <div className="relative bg-line-strong rounded-card-sm p-4">
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-orange mb-1.5">
               {t('wizard.tip_label')}
             </p>
@@ -145,8 +151,9 @@ export function WizardPage({ onComplete, onCancel }: Props) {
           <span className="hidden md:inline font-mono text-[11px] text-ink-muted">{t('wizard.key_hint')}</span>
         </div>
 
-        {/* key={question.id} で質問が変わるたびに再マウントし、遷移アニメーションを再生する */}
-        <div key={question.id} data-testid="question-area" className="flex-1 animate-fade-in">
+        {/* key={question.id} で質問が変わるたびに再マウントし、遷移アニメーションを再生する。
+            flex-1 で下まで広げない＝CTA フッターが選択肢直下に来て視線移動を最小にする */}
+        <div key={question.id} data-testid="question-area" className="animate-fade-in">
           {question.type === 'choice' && (
             <div className="grid md:grid-cols-2 gap-3 content-start">
               {(question as ChoiceQuestion).options.map((opt, i) => (
@@ -172,10 +179,9 @@ export function WizardPage({ onComplete, onCancel }: Props) {
           )}
         </div>
 
-        {/* 進捗を励ますコーナーマスコット（CTA フッターと重ならないよう持ち上げる） */}
+        {/* 進捗を励ますコーナーマスコット（fixed 右下・スクロール追従） */}
         <MascotCorner
           size={88}
-          className="!bottom-24"
           text={
             state.currentIndex === total - 1
               ? t('wizard.mascot_last')

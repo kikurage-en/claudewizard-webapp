@@ -13,7 +13,7 @@ export function MascotCorner({ text, size = 96, className = '' }: Props) {
     <div
       aria-hidden="true"
       data-testid="mascot-corner"
-      className={`pointer-events-none select-none absolute bottom-7 right-7 hidden md:flex items-end gap-3 ${className}`}
+      className={`pointer-events-none select-none fixed bottom-5 right-5 z-30 hidden md:flex items-end gap-3 ${className}`}
     >
       {text && (
         <div

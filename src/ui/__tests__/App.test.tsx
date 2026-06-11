@@ -40,6 +40,18 @@ describe('App（/complete ガード: リロード・直リンクで完了状態�
     expect(screen.getByText('フリー')).toBeInTheDocument() // トップ（プラン選択）が表示される
   })
 
+  it('ページ遷移（route 変更）時にスクロール位置を最上部へリセットする', async () => {
+    const scrollSpy = vi.spyOn(window, 'scrollTo')
+    render(<App />)
+    scrollSpy.mockClear() // 初回マウント分を除外し、遷移起因の呼び出しだけを検証する
+
+    // トップ → ウィザードへ遷移（モバイルで前ページのスクロール位置を引き継がない）
+    fireEvent.click(screen.getByRole('button', { name: /フリー/ }))
+    await waitFor(() => expect(window.location.hash).toBe('#/ja/wizard'))
+    await waitFor(() => expect(scrollSpy).toHaveBeenCalledWith(0, 0))
+    scrollSpy.mockRestore()
+  })
+
   it('ウィザード完走後の /complete は CompletePage（準備完了）を表示する（ガードの誤爆なし）', async () => {
     render(<App />)
 

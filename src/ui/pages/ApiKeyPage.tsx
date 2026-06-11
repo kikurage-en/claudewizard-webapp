@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from '../../i18n/useTranslation'
 import { saveApiKey } from '../../security/sessionStore'
 import { trackEvent } from '../../analytics/events'
+import { MascotCorner } from '../components/MascotCorner'
 import type { Lang } from '../../i18n/types'
 import type { Plan } from '../../wizard/types'
 
@@ -29,6 +30,7 @@ export function ApiKeyPage({ plan, onContinue, onCancel }: Props) {
 
   return (
     <main className="min-h-screen bg-cream flex items-center justify-center px-4">
+      <MascotCorner size={64} />
       <div className="w-full max-w-md">
         <div className="flex gap-2 mb-6">
           <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-1 rounded border border-orange text-orange bg-cream-peach">

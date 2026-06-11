@@ -33,6 +33,12 @@ export function App() {
     }
   }, [route, lang])
 
+  // hash 遷移はブラウザがスクロール位置を引き継ぐため、ページが変わったら最上部へ戻す
+  // （言語切替は route.name 不変＝同一コンテンツなので位置を維持する）
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [route.name])
+
   // /complete は completedState（メモリ上の完了状態）が前提のルート。
   // リロード・直リンクで状態がない場合はトップへ正規化し、URL/表示/page_view の不一致を残さない
   // （表示自体は下のフォールバック分岐が遮断済み。空回答での生成経路はここで URL ごと閉じる）

@@ -18,3 +18,7 @@ Object.defineProperty(window, 'matchMedia', {
       dispatchEvent: () => false,
     }) as unknown as MediaQueryList,
 })
+
+// jsdom は window.scrollTo 未実装（呼ぶと "Not implemented" エラーが出る）。
+// ルート/質問遷移時のスクロールリセットを spy 検証できるよう no-op を与える。
+Object.defineProperty(window, 'scrollTo', { writable: true, value: () => {} })

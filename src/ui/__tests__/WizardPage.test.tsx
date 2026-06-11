@@ -58,6 +58,17 @@ describe('WizardPage', () => {
     expect(nextBtn).toBeEnabled()
   })
 
+  it('質問遷移（次へ）でスクロール位置を最上部へリセットする（モバイルの位置引き継ぎ防止）', () => {
+    const scrollSpy = vi.spyOn(window, 'scrollTo')
+    renderWizardPage()
+    fireEvent.click(screen.getAllByRole('button', { pressed: false })[0])
+    scrollSpy.mockClear() // マウント分を除外し、質問遷移起因のみ検証
+    fireEvent.click(screen.getByRole('button', { name: /次へ|next/i }))
+    expect(screen.getByText(/質問 2 \/ 3/)).toBeInTheDocument()
+    expect(scrollSpy).toHaveBeenCalledWith(0, 0)
+    scrollSpy.mockRestore()
+  })
+
   it('キャンセルボタンを押すとonCancelが呼ばれる', () => {
     const onCancel = vi.fn()
     renderWizardPage(vi.fn(), onCancel)
