@@ -28,7 +28,7 @@ This project includes the following Claude Code configuration:
 | \`.claude/rules/security-guidelines.md\` | Security guidelines |
 | \`.claude/rules/core-principles.md\` | Core decision principles (Evidence First, etc.) |
 
-## License
+{{initGuidanceSection}}## License
 
 MIT
 `

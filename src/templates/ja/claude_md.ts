@@ -1,27 +1,17 @@
 export const template = `# {{projectName}}
 
-{{domain}} の Claude Code 設定ファイル。Claude はこのファイルのルールに従って作業する。
-
-## プロジェクト概要
-
-- **分野**: {{domain}}
-- **目的**: {{domain}} に関する作業を Claude Code と進めるためのプロジェクト
+{{domain}} の Claude Code 設定。
 
 ## Tech Stack
 
 {{techStack}}
 
-## Build & Test
-
-{{buildCommands}}
-
-## {{workRulesHeading}}
+## 作業ルール
 
 {{workRules}}
+- MUST: 迷ったときは推測で埋めず、確認する
 
-## Architecture
-
-{{architecture}}
+判断の基本原則（Evidence First 等）は @.claude/rules/core-principles.md を参照。
 
 ## Security
 
@@ -32,16 +22,9 @@ export const template = `# {{projectName}}
 
 詳細は @.claude/rules/security-guidelines.md を参照。
 
-## Important Rules
-
-- {{lifecycleRule}}
-- 迷ったときは推測で埋めず、確認する
-- ドキュメントを最新の状態に保つ
-- 判断の基本原則（Evidence First 等）は @.claude/rules/core-principles.md を参照
-
 ## Skills
 
 利用可能なスキルは @.claude/skills/main/SKILL.md を参照。
-`
+{{initGuidanceComment}}`
 
 export default template

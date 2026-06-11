@@ -37,7 +37,8 @@ describe('Japanese Free templates（dotfiles/CLI 接地・記入指示なし）'
     expect(r).toContain('TypeScript') // stack 由来の実値
     for (const p of INSTRUCTION_JA) expect(r).not.toMatch(p)
     expect(r.split('\n').length).toBeLessThanOrEqual(100) // CLI project-concept #5（≤100行）
-    expect((r.match(/^## /gm) ?? []).length).toBeGreaterThanOrEqual(6) // セクション構造
+    // 全行が効く方針（2026-06-11）: 埋め草節を持たないため 4 節（Tech Stack/作業ルール/Security/Skills）
+    expect((r.match(/^## /gm) ?? []).length).toBeGreaterThanOrEqual(4)
     expect(r).toContain('MUST') // dotfiles 12-rule 由来
     expect(r).toContain('@.claude/rules/security-guidelines.md') // @参照
   })
@@ -71,7 +72,7 @@ describe('English Free templates（dotfiles/CLI 接地・no instructions）', ()
     expect(r).toContain('TypeScript')
     for (const p of INSTRUCTION_EN) expect(r).not.toMatch(p)
     expect(r.split('\n').length).toBeLessThanOrEqual(100)
-    expect((r.match(/^## /gm) ?? []).length).toBeGreaterThanOrEqual(6)
+    expect((r.match(/^## /gm) ?? []).length).toBeGreaterThanOrEqual(4)
     expect(r).toContain('MUST')
   })
 

@@ -28,7 +28,7 @@ CLAUDE.md と .claude/ 配下のルール・スキルが Claude の動作基準�
 | \`.claude/rules/security-guidelines.md\` | セキュリティガイドライン |
 | \`.claude/rules/core-principles.md\` | 判断の基本原則（Evidence First 等） |
 
-## ライセンス
+{{initGuidanceSection}}## ライセンス
 
 MIT
 `

@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## v0.5.0 (2026-06-11)
+
+### 生成 CLAUDE.md の「全行が効く」化 + /init 育成フローの明示的前提化
+
+ユーザー指摘（Architecture のディレクトリ構造記載等への違和感）を公式基準（remove テスト・include/exclude 表）で監査し、埋め草節を確認。「実装が進んだら /init で更新するフローの明示的前提化」提案を多角検証のうえ採用（公式: /init は既存 CLAUDE.md を上書きせず改善提案／HTML コメントは context 注入前に剥離）。
+
+#### 修正
+
+- Free CLAUDE.md テンプレ: 埋め草節を削除（Architecture の「一般的な構成を前提」汎用文・プロジェクト概要の同語反復・Build & Test のメタ説明・ライフサイクルスローガン等）→ 約 27 行・全行が remove テスト合格の 4 節構成（Tech Stack / 作業ルール / Security / Skills）。節名「Code Style」→「作業ルール / Working Rules」に統一
+- /init 育成フローの案内（code 系 domain のみ）: CLAUDE.md 末尾に HTML コメント（公式仕様でトークン非消費）+ README に「CLAUDE.md の育て方」節。non-code は /init が機能しないため非表示
+- stackProfiles: techStack のみ返す設計に（Build & Test / Architecture はコード由来事実のため生成時に捏造せず /init へ委譲）。domainProfiles から lifecycleRule 廃止・initGuidance 2 変数追加
+- Light prompt: 「9 節必須」→ 必須 6 節 + 条件付き節（Build & Test / Architecture は回答・備考に実情報がある場合のみ・汎用文充填を禁止）+ 行単位 remove テスト基準 + README /init 節指示（**`.enc` 再暗号化は USER-GATED**）
+
+#### テスト・検証
+
+- domain-quality: 埋め草マーカー不在（全 domain×stack×日英）+ /init 案内の code/non-code 両方向検証を追加。stackProfiles テストは techStack 単独設計＋「コード由来事実を返さない」構造的証明に改訂
+- 全 469 件 PASS / typecheck PASS / coverage 91.13・85.01・95.83・93.45（閾値超）
+- spec 改訂: requirements（「完成済み」=「全行が効く」定義・/init 前提）/ constraints C-1-2（コード由来事実は /init へ委譲）/ 元要件 §16.1（補完関係の注記）
+
 ## v0.4.2 (2026-06-11)
 
 ### 完了画面のリロード・直リンクガードの検証固定とリダイレクト

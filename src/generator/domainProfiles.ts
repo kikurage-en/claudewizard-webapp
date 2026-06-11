@@ -22,9 +22,7 @@ export function isCodeLight(answers: Record<string, string>): boolean {
 }
 
 type DomainVars = {
-  workRulesHeading: string
   workRules: string
-  lifecycleRule: string
   reviewDescription: string
   securityMustNotExtra: string
   securityMustExtra: string
@@ -34,11 +32,14 @@ type DomainVars = {
   reviewChecklistRule: string
   reviewCriteriaFirst: string
   failureReflectionCriteria: string
+  // /init 育成フローの案内（code 系のみ。/init はコード分析ツールのため non-code は空）。
+  // CLAUDE.md 側は HTML コメント＝公式仕様で context 注入前に剥離される（保守者向け・トークン非消費）。
+  initGuidanceComment: string
+  initGuidanceSection: string
 }
 
 const CODE: Record<'ja' | 'en', DomainVars> = {
   ja: {
-    workRulesHeading: 'Code Style',
     workRules: [
       '- MUST: 問題を解決する最小限の変更にとどめる（投機的な実装をしない）',
       '- MUST: 触る必要のある箇所だけ変更する（無関係な整形・改善をしない）',
@@ -47,7 +48,6 @@ const CODE: Record<'ja' | 'en', DomainVars> = {
       '- MUST: 既存コードベースの規約に合わせる',
       '- MUST NOT: スキップした作業を「完了」と報告しない',
     ].join('\n'),
-    lifecycleRule: '構築 → テスト → デプロイ → 運用 の順に進める',
     reviewDescription: '変更差分を確認し、品質・セキュリティ観点でコメントする。',
     securityMustNotExtra: [
       '- 未検証の外部入力を直接実行または評価しない',
@@ -75,9 +75,24 @@ const CODE: Record<'ja' | 'en', DomainVars> = {
     reviewChecklistRule: 'コードレビューチェックリストを確認する',
     reviewCriteriaFirst: '意図・理由が理解できるコードか',
     failureReflectionCriteria: '「検知 → 通知 → 後続処理」の 3 段が成立しているコード位置を提示する',
+    initGuidanceComment: [
+      '',
+      '<!--',
+      '  この設定は初期状態です。コードが増えてきたら Claude Code で /init を実行してください。',
+      '  Build & Test・Architecture が実コードから検出され、既存の CLAUDE.md は上書きされず',
+      '  改善提案として統合できます（公式仕様）。',
+      '-->',
+    ].join('\n'),
+    initGuidanceSection: [
+      '## CLAUDE.md の育て方',
+      '',
+      'この設定ファイル一式は初期状態（出発点）です。実装が進んでコードが増えたら、Claude Code で `/init` を実行してください。',
+      'ビルドコマンドやディレクトリ構成が実コードから検出され、既存の CLAUDE.md は上書きされず改善提案として統合できます。',
+      '',
+      '',
+    ].join('\n'),
   },
   en: {
-    workRulesHeading: 'Code Style',
     workRules: [
       '- MUST: Make the minimum change that solves the problem (nothing speculative)',
       '- MUST: Touch only what you must (no unrelated reformatting or "improvements")',
@@ -86,7 +101,6 @@ const CODE: Record<'ja' | 'en', DomainVars> = {
       '- MUST: Match the existing codebase conventions',
       '- MUST NOT: Report skipped work as "completed"',
     ].join('\n'),
-    lifecycleRule: 'Proceed in order: build -> test -> deploy -> operate',
     reviewDescription: 'Review the diff and comment from quality and security perspectives.',
     securityMustNotExtra: [
       '- Directly execute or evaluate unvalidated external input',
@@ -114,12 +128,27 @@ const CODE: Record<'ja' | 'en', DomainVars> = {
     reviewChecklistRule: 'Go through the code review checklist',
     reviewCriteriaFirst: 'Is the intent and reasoning understandable from the code?',
     failureReflectionCriteria: 'point to the code location where "detect -> notify -> downstream" all hold',
+    initGuidanceComment: [
+      '',
+      '<!--',
+      '  This configuration is a starting point. Once the codebase grows, run /init in Claude Code.',
+      '  It detects Build & Test commands and architecture from the actual code, and suggests',
+      '  improvements without overwriting this CLAUDE.md (official behavior).',
+      '-->',
+    ].join('\n'),
+    initGuidanceSection: [
+      '## Growing Your CLAUDE.md',
+      '',
+      'This configuration set is a starting point. As your codebase grows, run `/init` in Claude Code.',
+      'It detects build commands and project structure from the actual code, and suggests improvements without overwriting your existing CLAUDE.md.',
+      '',
+      '',
+    ].join('\n'),
   },
 }
 
 const NON_CODE: Record<'ja' | 'en', DomainVars> = {
   ja: {
-    workRulesHeading: '作業ルール',
     workRules: [
       '- MUST: 目的を満たす最小限の変更にとどめる（頼まれていない作り込みをしない）',
       '- MUST: 触る必要のある箇所だけ変更する（無関係な手直し・装飾をしない）',
@@ -128,7 +157,6 @@ const NON_CODE: Record<'ja' | 'en', DomainVars> = {
       '- MUST: 既存の成果物のトーン・形式・用語に合わせる',
       '- MUST NOT: スキップした作業を「完了」と報告しない',
     ].join('\n'),
-    lifecycleRule: '確認 → 作成 → 見直し → 完成 の順に進める',
     reviewDescription: '成果物を確認し、品質・整合性の観点でコメントする。',
     securityMustNotExtra: [
       '- 出所不明のファイル・リンク・埋め込みコンテンツをそのまま利用しない',
@@ -156,9 +184,10 @@ const NON_CODE: Record<'ja' | 'en', DomainVars> = {
     reviewChecklistRule: 'レビュー観点（整合性・誤字・トーン）を確認する',
     reviewCriteriaFirst: '意図・背景が理解できる成果物か',
     failureReflectionCriteria: '「検知 → 通知 → 後続対応」の 3 段が成立する手順・チェックリストを提示する',
+    initGuidanceComment: '',
+    initGuidanceSection: '',
   },
   en: {
-    workRulesHeading: 'Work Rules',
     workRules: [
       '- MUST: Make the minimum change that meets the goal (nothing beyond what was asked)',
       '- MUST: Touch only what you must (no unrelated rewording or embellishment)',
@@ -167,7 +196,6 @@ const NON_CODE: Record<'ja' | 'en', DomainVars> = {
       '- MUST: Match the tone, format, and terminology of existing deliverables',
       '- MUST NOT: Report skipped work as "completed"',
     ].join('\n'),
-    lifecycleRule: 'Proceed in order: confirm -> create -> review -> finalize',
     reviewDescription: 'Review the deliverable and comment from quality and consistency perspectives.',
     securityMustNotExtra: [
       '- Use files, links, or embedded content from unknown sources as-is',
@@ -195,6 +223,8 @@ const NON_CODE: Record<'ja' | 'en', DomainVars> = {
     reviewChecklistRule: 'Go through the review points (consistency, typos, tone)',
     reviewCriteriaFirst: 'Is the intent and background understandable from the deliverable?',
     failureReflectionCriteria: 'point to the procedure or checklist where "detect -> notify -> follow-up" all hold',
+    initGuidanceComment: '',
+    initGuidanceSection: '',
   },
 }
 

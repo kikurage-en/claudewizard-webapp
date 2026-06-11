@@ -12,26 +12,25 @@ const SIGNATURE: Record<string, { ja: RegExp; en: RegExp }> = {
   ts: { ja: /TypeScript/, en: /TypeScript/ },
   python: { ja: /Python/, en: /Python/ },
   go: { ja: /言語: Go/, en: /Language: Go/ },
-  rust: { ja: /Rust|Cargo/, en: /Rust|Cargo/ },
+  rust: { ja: /Rust/, en: /Rust/ },
   'other-code': { ja: /複数|その他/, en: /Multiple|other/i },
   'non-code': { ja: /コード以外/, en: /non-code/i },
 }
 
-describe('buildStackVars（Free Tech Stack マッピング・コマンド断定なし完成文）', () => {
+// 2026-06-11「全行が効く」化: Build & Test / Architecture はコード由来の事実であり
+// 生成時に捏造しない（/init へ委譲）。stackProfiles は techStack（回答の実反映）のみを返す。
+describe('buildStackVars（Free Tech Stack マッピング・回答実反映のみ）', () => {
   for (const lang of ['ja', 'en'] as const) {
     describe(`lang=${lang}`, () => {
       for (const v of STACK_VALUES) {
-        it(`${v}: 3変数が非空・固有の具体文字列あり・記入指示命令形なし`, () => {
+        it(`${v}: techStack が非空・固有の具体文字列あり・記入指示命令形なし`, () => {
           const r = buildStackVars(v, lang)
           expect(r.techStack.length).toBeGreaterThan(0)
-          expect(r.buildCommands.length).toBeGreaterThan(0)
-          expect(r.architecture.length).toBeGreaterThan(0)
-          const all = `${r.techStack}\n${r.buildCommands}\n${r.architecture}`
           // 選択肢固有の具体文字列（汎用プレースホルダーで濁していないことの証明）
-          expect(all).toMatch(SIGNATURE[v][lang])
+          expect(r.techStack).toMatch(SIGNATURE[v][lang])
           // 記入指示・命令形が残っていない
           const patterns = lang === 'ja' ? INSTRUCTION_PATTERNS_JA : INSTRUCTION_PATTERNS_EN
-          for (const p of patterns) expect(all).not.toMatch(p)
+          for (const p of patterns) expect(r.techStack).not.toMatch(p)
         })
       }
     })
@@ -40,20 +39,16 @@ describe('buildStackVars（Free Tech Stack マッピング・コマンド断定�
   it('未知の値・未回答は other-code にフォールバック（破綻しない完成文）', () => {
     const r = buildStackVars('unknown-xyz', 'ja')
     expect(r.techStack).toContain('複数またはその他')
-    expect(r.buildCommands.length).toBeGreaterThan(0)
   })
 
-  // pivot の核心: パッケージマネージャが分岐する ts/python はコマンドを断定しない（推測注入の回避）
-  it('ts: npm/pnpm/yarn を断定しない', () => {
-    const r = buildStackVars('ts', 'ja')
-    const all = `${r.techStack}\n${r.buildCommands}\n${r.architecture}`
-    expect(all).not.toMatch(/npm (install|test|run)/)
-    expect(all).not.toMatch(/pnpm|yarn/)
+  it('コード由来事実（buildCommands/architecture）を返さない（/init 委譲の構造的証明）', () => {
+    const keys = Object.keys(buildStackVars('ts', 'ja'))
+    expect(keys).toEqual(['techStack'])
   })
-  it('python: pip install / pytest を断定しない', () => {
-    const r = buildStackVars('python', 'ja')
-    const all = `${r.techStack}\n${r.buildCommands}\n${r.architecture}`
-    expect(all).not.toMatch(/pip install/)
-    expect(all).not.toMatch(/pytest/)
+
+  it('ts: コマンド・パッケージマネージャを断定しない（推測注入の回避）', () => {
+    const r = buildStackVars('ts', 'ja')
+    expect(r.techStack).not.toMatch(/npm (install|test|run)/)
+    expect(r.techStack).not.toMatch(/pnpm|yarn/)
   })
 })

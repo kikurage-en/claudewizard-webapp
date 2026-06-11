@@ -67,18 +67,23 @@ const EN_LIGHT_STATIC: Record<string, string> = {
 const CODE_MARKERS = {
   ja: {
     claudeWorkRule: 'コードを書く前に',
-    claudeLifecycle: '構築 → テスト → デプロイ → 運用',
     securityDependency: 'npm audit',
     securityInjection: 'SQL',
     skillReview: '変更差分',
   },
   en: {
     claudeWorkRule: 'callers, and shared utilities',
-    claudeLifecycle: 'build -> test -> deploy -> operate',
     securityDependency: 'npm audit',
     securityInjection: 'SQL injection',
     skillReview: 'Review the diff',
   },
+}
+
+// 埋め草マーカー（公式 remove テスト不合格の汎用前提文）。全組合せで不在を証明する。
+// 旧テンプレの Architecture 節「一般的な構成（src/ 等）を前提に Claude が動作する」由来。
+const FILLER_MARKERS = {
+  ja: ['一般的な構成', 'を前提に Claude'],
+  en: ['assumes a conventional', 'Claude assumes'],
 }
 
 function renderFree(domain: string, stack: string, lang: 'ja' | 'en'): Record<string, string> {
@@ -149,20 +154,31 @@ describe.each(['ja', 'en'] as const)('Free 生成物の品質（%s・7 domain ×
 
         const securityMd = files['.claude/rules/security-guidelines.md']
         const skillMd = files['.claude/skills/main/SKILL.md']
+        const readmeMd = files['README.md']
+
+        // 埋め草の不在（全組合せ）: 公式 remove テスト不合格の汎用前提文が復活していない
+        for (const filler of FILLER_MARKERS[lang]) {
+          expect(claudeMd, `${label} 埋め草混入: ${filler}`).not.toContain(filler)
+        }
 
         if (expectCode) {
           // code 系: 現行のコード向け文言が保たれている（positive）
           expect(claudeMd).toContain(m.claudeWorkRule)
-          expect(claudeMd).toContain(m.claudeLifecycle)
           expect(securityMd).toContain(m.securityDependency)
           expect(skillMd).toContain(m.skillReview)
+          // /init 育成フローの案内: CLAUDE.md は HTML コメント（context 非消費）、README は節
+          expect(claudeMd).toContain('<!--')
+          expect(claudeMd).toContain('/init')
+          expect(readmeMd).toContain('/init')
         } else {
           // non-code 系: コード専用指示が混入しない（negative）
           expect(claudeMd).not.toContain(m.claudeWorkRule)
-          expect(claudeMd).not.toContain(m.claudeLifecycle)
           expect(securityMd).not.toContain(m.securityDependency)
           expect(securityMd).not.toContain(m.securityInjection)
           expect(skillMd).not.toContain(m.skillReview)
+          // /init はコード分析ツールのため非コード分野には案内しない
+          expect(claudeMd).not.toContain('/init')
+          expect(readmeMd).not.toContain('/init')
         }
       })
     }
